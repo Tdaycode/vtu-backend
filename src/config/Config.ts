@@ -13,7 +13,7 @@ const config = {
   jwtRefreshExpirationDays: 365,
   otpExpirationMinutes: 30,
   cryptoSecret: process.env.CRYPTO_SECRET ?? '',
-  emailSender: 'rashotech@gmail.com',
+  emailSender: process.env.EMAIL_SENDER ?? 'saverdev022@gmail.com',
   twilioSID: process.env.TWILIO_ACCOUNT_SID ?? '',
   twilioToken: process.env.TWILIO_AUTH_TOKEN ?? '',
   twilioVerifySID: process.env.TWILIO_VERIFY_SID ?? '',
@@ -44,6 +44,9 @@ const config = {
 
   openExchangeRateBaseUrl: process.env.OPEN_EXCHANGE_RATE_BASE_URL ?? '',
   openExchangeRateAppId: process.env.OPEN_EXCHANGE_RATE_APP_ID ?? '',
+
+  gmailUser: process.env.GMAIL_USER ?? '',
+  gmailPassword: process.env.GMAIL_PASSWORD ?? '',
 };
 
 export default config;
