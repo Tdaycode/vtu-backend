@@ -1,0 +1,21 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const cowry_1 = require("../validations/cowry");
+const validate_middleware_1 = __importDefault(require("../middlewares/validate.middleware"));
+const auth_middleware_1 = __importDefault(require("../middlewares/auth.middleware"));
+const typedi_1 = require("typedi");
+const cowry_controller_1 = __importDefault(require("../controllers/cowry.controller"));
+const helpers_1 = require("../utils/helpers");
+const getAllItems_validation_1 = require("../validations/common/getAllItems.validation");
+const router = express_1.default.Router();
+const cowryController = typedi_1.Container.get(cowry_controller_1.default);
+const authMiddleware = typedi_1.Container.get(auth_middleware_1.default);
+router.get('/view/:code', authMiddleware.user, validate_middleware_1.default.validate(cowry_1.CheckCowryValidation, helpers_1.responseType.params), cowryController.checkCowryVoucher);
+router.post('/load', authMiddleware.user, validate_middleware_1.default.validate(cowry_1.LoadCowryValidation), cowryController.loadCowryVoucher);
+router.post('/transfer', [authMiddleware.user, validate_middleware_1.default.validate(cowry_1.TransferCowryValidation), authMiddleware.verifyPin], cowryController.transferCowry);
+router.get('/transactions', authMiddleware.user, validate_middleware_1.default.validate(getAllItems_validation_1.GetAllItemsValidation), cowryController.getCowryTransactions);
+exports.default = router;

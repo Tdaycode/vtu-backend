@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "noImplicitAny": false,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
+  },
+  "include": ["./typings", "src"],
+  "exclude": ["node_modules"]
+}

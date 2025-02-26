@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TVTransformer = exports.InternetTransformer = exports.ElectricityTransformer = exports.BettingTransformer = exports.DataTransformer = exports.AirtimeTransformer = void 0;
+const index_1 = require("./airtime/index");
+Object.defineProperty(exports, "AirtimeTransformer", { enumerable: true, get: function () { return index_1.AirtimeTransformer; } });
+const index_2 = require("./data/index");
+Object.defineProperty(exports, "DataTransformer", { enumerable: true, get: function () { return index_2.DataTransformer; } });
+const index_3 = require("./betting/index");
+Object.defineProperty(exports, "BettingTransformer", { enumerable: true, get: function () { return index_3.BettingTransformer; } });
+const index_4 = require("./electricity/index");
+Object.defineProperty(exports, "ElectricityTransformer", { enumerable: true, get: function () { return index_4.ElectricityTransformer; } });
+const index_5 = require("./internet/index");
+Object.defineProperty(exports, "InternetTransformer", { enumerable: true, get: function () { return index_5.InternetTransformer; } });
+const index_6 = require("./tv/index");
+Object.defineProperty(exports, "TVTransformer", { enumerable: true, get: function () { return index_6.TVTransformer; } });

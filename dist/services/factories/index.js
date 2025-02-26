@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DataProviderFactory = exports.TVProviderFactory = exports.InternetProviderFactory = exports.GiftCardProviderFactory = exports.ElectricityProviderFactory = exports.BettingProviderFactory = exports.AirtimeProviderFactory = void 0;
+const electricity_factory_1 = require("./electricity.factory");
+Object.defineProperty(exports, "ElectricityProviderFactory", { enumerable: true, get: function () { return electricity_factory_1.ElectricityProviderFactory; } });
+const airtime_factory_1 = require("./airtime.factory");
+Object.defineProperty(exports, "AirtimeProviderFactory", { enumerable: true, get: function () { return airtime_factory_1.AirtimeProviderFactory; } });
+const betting_factory_1 = require("./betting.factory");
+Object.defineProperty(exports, "BettingProviderFactory", { enumerable: true, get: function () { return betting_factory_1.BettingProviderFactory; } });
+const giftcard_factory_1 = require("./giftcard.factory");
+Object.defineProperty(exports, "GiftCardProviderFactory", { enumerable: true, get: function () { return giftcard_factory_1.GiftCardProviderFactory; } });
+const internet_factory_1 = require("./internet.factory");
+Object.defineProperty(exports, "InternetProviderFactory", { enumerable: true, get: function () { return internet_factory_1.InternetProviderFactory; } });
+const tv_factory_1 = require("./tv.factory");
+Object.defineProperty(exports, "TVProviderFactory", { enumerable: true, get: function () { return tv_factory_1.TVProviderFactory; } });
+const data_factory_1 = require("./data.factory");
+Object.defineProperty(exports, "DataProviderFactory", { enumerable: true, get: function () { return data_factory_1.DataProviderFactory; } });

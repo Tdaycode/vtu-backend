@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  giftcop-backend:
+    depends_on:
+      - database-layer
+    environment:
+      - NODE_ENV=development
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    container_name: giftcop-backend
+    expose:
+      - '4000'
+    ports:
+      - '4000:4000'
+    command: npm run dev
+    networks:
+      - shared-network
+    restart: on-failure
+
+networks:
+  shared-network:
