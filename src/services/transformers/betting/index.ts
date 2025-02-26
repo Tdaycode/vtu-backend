@@ -1,5 +1,6 @@
 import { FormattedProductInfo } from '../../../interfaces/formatted/product-info.interface';
 import { NotFoundError } from '../../../utils/ApiError';
+import { interswitchBettingTransformer } from './interswitch.betting.transformer';
 import { primeairtimeBettingTransformer } from './primeairtime.betting.transformer';
 
 type TransformerRegister = {
@@ -13,6 +14,7 @@ type ResponseObject = {
 export class BettingTransformer {
   static transformers: TransformerRegister = {
     primeairtime: primeairtimeBettingTransformer,
+    interswitch: interswitchBettingTransformer,
   };
 
   static betting(rawData: ResponseObject, provider: string): FormattedProductInfo {

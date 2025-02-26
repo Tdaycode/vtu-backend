@@ -5,6 +5,10 @@ import productRoute from './product.route';
 import orderRoute from './order.route';
 import paymentRoute from './payment.route';
 import cowryRoute from './cowry.route';
+import walletRoute from './wallet.route';
+import webhookRoute from './webhook.route';
+import categoryRoute from './category.route';
+import settingsRoute from './settings.route';
 
 const router = express.Router();
 
@@ -16,6 +20,10 @@ const allRoutes = [
   {
     path: '/user',
     route: userRoute,
+  },
+  {
+    path: '/categories',
+    route: categoryRoute,
   },
   {
     path: '/products',
@@ -32,6 +40,18 @@ const allRoutes = [
   {
     path: '/cowry',
     route: cowryRoute,
+  },
+  {
+    path: '/wallet',
+    route: walletRoute
+  },
+  {
+    path: '/settings',
+    route: settingsRoute
+  },
+  {
+    path: '/webhook',
+    route: webhookRoute,
   },
 ];
 

@@ -1,26 +1,29 @@
+import { ManualProductProvider } from './../interfaces/provider.interface';
 import { Service } from 'typedi';
 import { ObjectId } from 'mongodb';
 import { Schema } from 'mongoose';
 import ProductRepository from '../repositories/product.repository';
 import { BadRequestError } from '../utils/ApiError';
-import { IProduct, ProductTypes } from '../interfaces/product.interface';
-import { PrimeAirtimeProvider } from '../providers';
-import { ServiceProvider } from '../interfaces/provider.interface';
+import { IProduct, IProductDocument, PaymentTypes, ProductTypes, Providers, ServiceTypes } from '../interfaces/product.interface';
+import { IGetServiceInfo, ServiceProvider } from '../interfaces/provider.interface';
 import { InternetProviderFactory, ElectricityProviderFactory, TVProviderFactory, 
-  BettingProviderFactory, AirtimeProviderFactory} from './factories';
-import { InternetTransformer,  TVTransformer, ElectricityTransformer, 
+  BettingProviderFactory, AirtimeProviderFactory, ManualProviderFactory } from './factories';
+import { InternetTransformer,  TVTransformer, ElectricityTransformer, ManualProductTransformer,
   BettingTransformer, DataTransformer, AirtimeTransformer } from './transformers';
 import { LoggerClient } from './logger.service';
 import CurrencyService from './currency.service';
-import { CowryService } from '.';
+import CowryService from './cowry.service';
+import { CategoryRepository } from '../repositories';
+import { GiftlyProvider } from '../providers';
 
 @Service()
 export default class ProductService {
   constructor(
     public logger: LoggerClient,
     public productRepository: ProductRepository,
-    public primeAirtimeProvider: PrimeAirtimeProvider,
+    public categoryRepository: CategoryRepository,
     public currencyService: CurrencyService,
+    public giftlyProvider: GiftlyProvider,
     public cowryService: CowryService
   ) { }
 
@@ -74,71 +77,154 @@ export default class ProductService {
     return response;
   };
 
-  getProductInfo = async (productId: string, receipient: string) => {
-    let provider: ServiceProvider, rawInfo :any = {}, transformedData: any;
-    const response = await this.productRepository.findOne({ sid: productId });
+  editProduct = async (id: string, data: Partial<IProductDocument>) => {
+    const response = await this.productRepository.findOne({ _id: id });
     if (!response) throw new BadRequestError('Product with the given credential does not exist.');
-
-    // Check Active Provider
-    const providers = response.providers?.filter(item => item.active === true);
-    if(!providers || providers.length === 0) throw new BadRequestError("No Provider available")
-    const product_id = providers[0].productId;
-    const serviceId = providers[0].serviceId;
-    const currentProvider = providers[0].name;
-    const productType = response.type;
-
-    const rawData = {
-      type: productType,
-      provider: currentProvider,
-      productName: response.name
-    } 
-
-    switch (productType) {
-      case ProductTypes.Airtime:
-        provider = AirtimeProviderFactory.getProvider(currentProvider);
-        rawInfo = await provider.getAirtimeTopUpInfo(receipient);
-        transformedData = AirtimeTransformer.airtime({ ...rawInfo, ...rawData }, currentProvider);
-        break;
-
-      case ProductTypes.Data:
-        provider = AirtimeProviderFactory.getProvider(currentProvider);
-        rawInfo = await provider.getDataTopUpInfo(receipient);
-        transformedData = DataTransformer.Data({ ...rawInfo, ...rawData }, currentProvider);
-        break;
-
-      case ProductTypes.Betting:
-        provider = BettingProviderFactory.getProvider(currentProvider);
-        rawInfo = await provider.getBettingInfo(receipient, productType, serviceId, product_id);
-        transformedData = BettingTransformer.betting({ ...rawInfo, ...rawData }, currentProvider);
-        break;
-
-      case ProductTypes.Electricity:
-        provider = ElectricityProviderFactory.getProvider(currentProvider);
-        rawInfo = await provider.getElectricityInfo(receipient, productType, serviceId, product_id);
-        transformedData = ElectricityTransformer.electricity({ ...rawInfo, ...rawData }, currentProvider);
-        break;
-      
-      case ProductTypes.TV:
-        provider = TVProviderFactory.getProvider(currentProvider);
-        rawInfo = await provider.getTVInfo(receipient, productType, serviceId, product_id);
-        transformedData = TVTransformer.tv({ ...rawInfo, ...rawData }, currentProvider);
-        break;
-
-      case ProductTypes.Internet:
-        provider = InternetProviderFactory.getProvider(currentProvider);
-        rawInfo = await provider.getInternetInfo(receipient, productType, serviceId, product_id);
-        transformedData = InternetTransformer.internet({ ...rawInfo, ...rawData }, currentProvider);
-        break; 
-
-      // case ProductTypes.GiftCard:
-      //   rawInfo = { product_id, country, productCurrency: response.currency };
-      //   transformedData = this.cowryService.getCowryProductInfo({ ...rawInfo, ...rawData });
-      //   break; 
-
-      default:
-        throw new BadRequestError(`Product Type "${productType}" not found`);
-    }
-
-    return transformedData;
+    return await this.productRepository.updateOne({ _id: id }, data);
   };
+
+  public createProduct = async (data: Partial<IProductDocument>) => {
+    const category = await this.categoryRepository.findOne({ _id: data.category });
+    if(!category) throw new BadRequestError('Category does not exist.');
+    return await this.productRepository.create({
+      ...data,
+      type: ProductTypes.Manual,
+    });
+  };
+
+  getProductInfo = async (productId: string, receipient: string) => {
+   try {
+     let provider: ServiceProvider | ManualProductProvider, rawInfo :any = {}, transformedData: any;
+     const response = await this.productRepository.findOne({ sid: productId });
+     if (!response) throw new BadRequestError('Product with the given credential does not exist.');
+ 
+     // Check Active Provider
+     const providers = response.providers?.filter(item => item.active === true);
+     if(!providers || providers.length === 0) throw new BadRequestError("No Provider available")
+     const product_id = providers[0].productId; 
+     const serviceId = providers[0].serviceId;
+     const currentProvider = providers[0].name;
+     const productType = response.type;
+ 
+     const rawData = {
+       product: response,
+       type: productType,
+       provider: currentProvider,
+       productName: response.name
+     } 
+ 
+     const servicePayload: IGetServiceInfo = { receipient, productType, serviceId, product_id };
+ 
+     switch (productType) {
+       case ProductTypes.Airtime:
+         provider = AirtimeProviderFactory.getProvider(currentProvider);
+         rawInfo = await provider.getAirtimeTopUpInfo(receipient, product_id);
+         transformedData = AirtimeTransformer.airtime({ ...rawInfo, ...rawData, product_id }, currentProvider); 
+         break;
+ 
+       case ProductTypes.Data:
+         provider = AirtimeProviderFactory.getProvider(currentProvider);
+         rawInfo = await provider.getDataTopUpInfo(receipient);
+         transformedData = DataTransformer.Data({ ...rawInfo, ...rawData }, currentProvider);
+         break;
+ 
+       case ProductTypes.Betting:
+         provider = BettingProviderFactory.getProvider(currentProvider);
+         rawInfo = await provider.getBettingInfo(servicePayload);
+         transformedData = BettingTransformer.betting({ ...rawInfo, ...rawData, product_id }, currentProvider);
+         break;
+ 
+       case ProductTypes.Electricity:
+         provider = ElectricityProviderFactory.getProvider(currentProvider);
+         rawInfo = await provider.getElectricityInfo(servicePayload);
+         transformedData = ElectricityTransformer.electricity({ ...rawInfo, ...rawData }, currentProvider);
+         break;
+       
+       case ProductTypes.TV:
+         provider = TVProviderFactory.getProvider(currentProvider);
+         rawInfo = await provider.getTVInfo(servicePayload);
+         transformedData = TVTransformer.tv({ ...rawInfo, ...rawData, product_id }, currentProvider);
+         break;
+ 
+       case ProductTypes.Internet:
+         provider = InternetProviderFactory.getProvider(currentProvider);
+         rawInfo = await provider.getInternetInfo(servicePayload);
+         transformedData = InternetTransformer.internet({ ...rawInfo, ...rawData }, currentProvider);
+         break; 
+
+      case ProductTypes.Manual:
+         provider = ManualProviderFactory.getProvider(currentProvider);
+         rawInfo = provider.getManualProductAvailability();
+         transformedData = ManualProductTransformer.manual({ ...rawInfo, ...rawData }, currentProvider);
+         break; 
+ 
+       // case ProductTypes.GiftCard:
+       //   rawInfo = { product_id, country, productCurrency: response.currency };
+       //   transformedData = this.cowryService.getCowryProductInfo({ ...rawInfo, ...rawData });
+       //   break; 
+ 
+       default:
+         throw new BadRequestError(`Product Type "${productType}" not found`);
+     }
+ 
+     return transformedData;
+   } catch (error: any) {
+      this.logger.error(error?.message || "Something went wrong");
+      throw error;
+   }
+  };
+
+  public checkGiftlyCatalogUpdate = async () => {
+    try {
+      const catalogs = await this.giftlyProvider.getCatalogs();
+      const category = await this.categoryRepository.findOne({ name: "Gift Card" });
+      const baseFilter = { 'providers.name': Providers.Giftly };
+      const products = await this.productRepository.findAll(baseFilter);
+      
+      for (const product of catalogs.results) {
+        const response = products.find((p) => {
+          if(p.providers && p.providers?.length > 0) {
+            const productId = p?.providers[0].productId
+            return productId === product.sku.toString()
+          }
+        });
+        const currencyCode = product.currency.code === "GYD" ? "USD" : product.currency.code;
+        if (!response) {
+          const _product = {
+            name: product.title,
+            imageUrl: product.image,
+            description: product.description,
+            category: category?._id,
+            currency: currencyCode,
+            allowedPaymentOptions: [PaymentTypes.Flutterwave, PaymentTypes.BinancePay, PaymentTypes.Cowry, PaymentTypes.Wallet],
+            displayCountries: ["GLC", product.regions[0].code],
+            type: ProductTypes.GiftCard,
+            minPrice: product.min_price,
+            maxPrice: product.max_price,
+            label: "Email Address",
+            providers:[{
+                name: Providers.Giftly,
+                productId: product.sku.toString(),
+                serviceId: ServiceTypes.GiftCard,
+                active: true
+            }]
+          };
+          try {
+            await this.productRepository.create(_product)
+          } catch (error) {
+            console.log(error)
+          }
+        }
+      }
+      
+      const _deleteFilter = { $nin: catalogs.results.map(p => p.sku.toString()) };
+      const deleteFilter = { ...baseFilter, 'providers.productId': _deleteFilter };
+      await this.productRepository.deleteMany(deleteFilter);
+
+      this.logger.info('Gifly Catalog Synchronization complete.');
+    } catch (err) {
+      console.log(err)
+      this.logger.error("Gifly Catalog Synchronization failed");
+    }
+  }; 
 }

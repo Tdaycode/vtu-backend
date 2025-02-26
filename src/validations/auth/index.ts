@@ -1,6 +1,6 @@
 import { SignInValidation } from '../auth/signin.validation';
 import { SignUpValidation } from '../auth/signup.validation';
-import { VerifyOtpValidation } from './verifyotp.validation';
+import { VerifyOtpValidation, VerifyPhoneOtpValidation } from './verifyotp.validation';
 import { ResendOtpValidation } from './resendotp.validation';
 import { TwoFAValidation } from './twoFa.validation';
 import { Setup2faValidation } from './setup2fa.validation';
@@ -15,6 +15,7 @@ export {
     SignUpValidation, 
     VerifyOtpValidation, 
     ResendOtpValidation, 
+    VerifyPhoneOtpValidation,
     TwoFAValidation, 
     Setup2faValidation, 
     Verify2faValidation,

@@ -8,7 +8,7 @@ export interface IOrder {
     currency: string,
     status?: OrderStatus,
     userId: ObjectId,
-    paymentId?: ObjectId,
+    paymentId: ObjectId,
     prepaid?: boolean,
     product: Product,
     amount: number,
@@ -38,6 +38,7 @@ export enum OrderStatus {
     Pending = 'pending',
     Successful = 'successful',
     Failed = 'failed',
+    Cancelled = 'cancelled',
 }
 export interface IOrderDocument extends IOrder, Document {}
 
@@ -51,9 +52,10 @@ export interface IOrderSummaryRequest {
 }
 
 export interface IOrderRequest extends IOrderSummaryRequest {
-    paymentMethod: PaymentTypes,
-    userId: ObjectId,
-    pin?: string
+    paymentMethod: PaymentTypes;
+    userId: ObjectId;
+    currency: string;
+    pin?: string;
 }
 
   

@@ -2,14 +2,14 @@ import { Service } from 'typedi';
 import Big from 'big.js';
 import { BadRequestError } from '../utils/ApiError';
 import countryToCurrency from 'country-to-currency'
-import { CowryTransferData, ICowryDocument } from '../interfaces/cowry.interface';
+import { CowryTransferData, ICowryDocument, ICowryQuery } from '../interfaces/cowry.interface';
 import { generateCowryVoucherCode, generateShortID } from '../utils/helpers';
-import Cowry from '../models/cowry.model';
 import { CowryTransactionRepository, CowryRepository, UserRepository } from '../repositories';
 import { TransactionStatus, Transactiontype } from '../interfaces/cowry-transaction.interface';
 import runInTransaction from '../utils/runInTransaction.util';
 import { LoggerClient } from './logger.service';
 import CurrencyService from './currency.service';
+import { ObjectId } from 'mongodb';
 
 @Service()
 export default class CowryService {
@@ -56,16 +56,15 @@ export default class CowryService {
     if (!user) throw new BadRequestError("Unable to Credit Cowry")
   };
 
-  public static createCowryVoucher = async (value: number) => {
+  public createCowryVoucher = async (value: number, userId: string) => {
     const code = generateCowryVoucherCode();
     const pin = generateShortID();
-    const cowry = new Cowry({ value, code, pin });
-    await cowry.save();
+    await this.cowryRepository.create({ value, code, pin, buyerId: new ObjectId(userId) });
     return { code, pin };
   };
 
   public checkCowryVoucher = async (code: string) => {
-    const cowry = await this.cowryRepository.findOne({ code });
+    const cowry = await this.cowryRepository.findOne({ code, disabled: false });
     const cowryInfo: Partial<ICowryDocument> = cowry.toObject();
     delete cowryInfo['pin'];
 
@@ -73,17 +72,18 @@ export default class CowryService {
   };
 
   public loadCowryVoucher = async (code: string, pin: string, userId: string) => {
-    const cowry = await this.cowryRepository.findOne({ code, isValid: true });
+    const cowry = await this.cowryRepository.findOne({ code, isValid: true, disabled: false });
     if (!(await cowry.isPinMatch(pin))) throw new BadRequestError('Invalid Code or Pin');
     await this.creditCowry(userId, cowry.value);
-    await this.cowryRepository.updateOne({ code }, { isValid: false });
-    await this.recordCowryTransaction(userId, Transactiontype.Credit, TransactionStatus.Successful, cowry.value)
+    await this.cowryRepository.updateOne({ code }, { isValid: false, loaderId: userId });
+    const description = `Cowry Voucher Code: ${code} loaded`;
+    await this.recordCowryTransaction(userId, Transactiontype.Credit, TransactionStatus.Successful, cowry.value, description)
     return cowry;
   };
 
   public recordCowryTransaction = async (userId: string, type: Transactiontype, status: TransactionStatus, 
-    amount: number, sender = "Telebank") => {
-    const transaction = await this.cowryTransactionRepository.create(userId, type, amount, status, sender);
+    amount: number, description = "", sender = "TeleBank") => {
+    const transaction = await this.cowryTransactionRepository.create(userId, type, amount, status, sender, description);
     return transaction;
   };
 
@@ -137,11 +137,30 @@ export default class CowryService {
     });
   };
 
-  getCowryTransactions = async (userId: string, page: string, limit: string) => {
+  public getCowryTransactions = async (userId: string, page: string, limit: string) => {
     const _page = parseInt(page) ? parseInt(page) : 1;
     const _limit = parseInt(limit) ? parseInt(limit) : 10;
     const skip: number = (_page - 1) * _limit;
     const filter = { userId }, sort = { createdAt: -1 };
     return await this.cowryTransactionRepository.findAllWithPagination(filter, sort, skip, _limit);
+  };
+
+  public getCowryVouchers = async (query: ICowryQuery) => {
+    const { page, limit, isValid, disabled, code } = query;
+    const _page = parseInt(page) ? parseInt(page) : 1;
+    const _limit = parseInt(limit) ? parseInt(limit) : 10;
+    const skip: number = (_page - 1) * _limit;
+    let filter: any = { }, sort: any = { createdAt: -1 };
+    if(isValid) filter = { ...filter, isValid };
+    if(disabled) filter = { ...filter, disabled };    
+    if(code) filter = { ...filter, code };    
+    return await this.cowryRepository.findAllWithPagination(filter, sort, skip, _limit);
+  };
+
+  public toggleCowryVoucher = async (id: string) => {
+    const voucher = await this.cowryRepository.findOne({ _id: id });
+    let update = { disabled: true };
+    if(voucher?.disabled === true) update = { disabled: false };
+    return await this.cowryRepository.updateOne({ _id: id }, update);
   };
 }

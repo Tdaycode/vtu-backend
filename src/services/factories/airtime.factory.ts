@@ -1,4 +1,7 @@
+import { Providers } from '../../interfaces/product.interface';
 import { ServiceProvider } from '../../interfaces/provider.interface';
+import { ValueTopupProvider } from '../../providers';
+import { InterSwitchProvider } from '../../providers/interswitch.provider';
 import { PrimeAirtimeProvider } from '../../providers/primeAirtime.provider';
 import { NotFoundError } from '../../utils/ApiError';
 
@@ -8,7 +11,9 @@ type AirtimeProviderMap = {
 
 export class AirtimeProviderFactory {
   static factories: AirtimeProviderMap = {
-    primeairtime: new PrimeAirtimeProvider()
+    [Providers.PrimeAirtime]: new PrimeAirtimeProvider(),
+    [Providers.Interswitch]: new InterSwitchProvider(),
+    [Providers.ValueTopup]: new ValueTopupProvider(),
   };
 
   static getProvider(factoryName: string): ServiceProvider {

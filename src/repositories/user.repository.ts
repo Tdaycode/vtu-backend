@@ -5,21 +5,9 @@ import { Service } from 'typedi';
 @Service()
 export default class UserRepository {
   createUser = async (
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string,
-    phoneNumber: string,
-    country: string,
+   data: Partial<IUserDocument>
   ): Promise<IUserDocument> => {
-    const user = new User({
-      firstName,
-      lastName,
-      email,
-      password,
-      phoneNumber,
-      country,
-    });
+    const user = new User(data);
     return await user.save();
   };
 
@@ -38,7 +26,7 @@ export default class UserRepository {
   };
 
   getAllUsers = async (): Promise<IUserDocument[]> => {
-    return await User.find();
+    return await User.find({});
   };
 
   getUser = async (filter: any): Promise<IUserDocument| null> => {
@@ -46,7 +34,7 @@ export default class UserRepository {
   };
 
   getUserProfile = async (id: string): Promise<IUserDocument| null> => {
-    return await User.findOne({ _id: id}).select("-password -twoFA -__v")
+    return await User.findById(id).select("-password -pin -twoFA -__v")
       .populate({ path: 'kycLevel', select: '-_id level dailyLimit monthlyLimit baseCurrency' });
   };
 

@@ -21,7 +21,7 @@
           <mj-image
             src="https://firebasestorage.googleapis.com/v0/b/i2talk.appspot.com/o/EGIFT-03%201.png?alt=media&token=7c1cdbed-b397-4b5c-b704-f815861eb0cd"
             align="center"
-            alt="Telebank logo"
+            alt="TeleBank logo"
             width="120px"
             href="https://telebank.com"
           />
@@ -65,9 +65,17 @@
             <td style="padding: 0 15px 0 0;">Product Name:</td>
             <td style="padding: 0 15px 0 0;">{name}</td>
           </tr>
+         <tr>
+            <td style="padding: 0 15px 0 0;">Service Fee:</td>
+            <td style="padding: 0 15px 0 0;">{currency} {serviceFee}</td>
+          </tr>
+          <tr>
+            <td style="padding: 0 15px 0 0;">Discount:</td>
+            <td style="padding: 0 15px 0 0;">{currency} {discount}</td>
+          </tr>
           <tr>
             <td style="padding: 0 15px 0 0;">Amount Paid:</td>
-            <td style="padding: 0 15px 0 0;">{currency} {amount}</td>
+            <td style="padding: 0 15px 0 0;">{currency} {amountPaid}</td>
           </tr>
            <tr>
             <td style="padding: 0 15px 0 0;">Reference:</td>
@@ -92,7 +100,7 @@
         </mj-table>
           
             <mj-text align="center" padding-top="20">
-            Thanks for choosing Telebank
+            Thanks for choosing TeleBank
           </mj-text>
         </mj-column>
       </mj-section>

@@ -7,7 +7,10 @@ import OrderRepository from './order.repository';
 import OTPRepository from './otp.repository';
 import ProductRepository from './product.repository';
 import UserRepository from './user.repository';
+import SettingsRepository from './settings.repository';
 import PaymentRepository from './payment.repository';
+import WalletTransactionRepository from './wallet-transaction.repository';
+import PaymentMethodRepository from './payment-method.repository';
 
 
 export { 
@@ -20,5 +23,8 @@ export {
     OTPRepository,
     ProductRepository,
     UserRepository,
-    PaymentRepository
+    PaymentRepository,
+    SettingsRepository,
+    PaymentMethodRepository,
+    WalletTransactionRepository
 };

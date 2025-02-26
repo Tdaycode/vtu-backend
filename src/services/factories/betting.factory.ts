@@ -1,4 +1,5 @@
 import { ServiceProvider } from '../../interfaces/provider.interface';
+import { InterSwitchProvider } from '../../providers/interswitch.provider';
 import { PrimeAirtimeProvider } from '../../providers/primeAirtime.provider';
 import { NotFoundError } from '../../utils/ApiError';
 
@@ -8,7 +9,8 @@ type BettingProviderMap = {
 
 export class BettingProviderFactory {
   static factories: BettingProviderMap = {
-    primeairtime: new PrimeAirtimeProvider()
+    primeairtime: new PrimeAirtimeProvider(),
+    interswitch: new InterSwitchProvider(),
   };
 
   static getProvider(factoryName: string): ServiceProvider {

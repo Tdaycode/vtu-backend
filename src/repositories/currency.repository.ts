@@ -1,6 +1,7 @@
 import Currency from '../models/currency.model';
 import { Service } from 'typedi';
 import { ICurrency, ICurrencyDocument } from '../interfaces/currency.interface';
+import { FilterQuery } from 'mongoose';
 
 @Service()
 export default class CurrencyRepository {
@@ -9,8 +10,8 @@ export default class CurrencyRepository {
     return await document.save();
   };
 
-  findAll = async (): Promise<ICurrencyDocument[]> => {
-    return await Currency.find();
+  findAll = async (filter: FilterQuery<ICurrencyDocument> = {}): Promise<ICurrencyDocument[]> => {
+    return await Currency.find(filter);
   };
 
   findById = async (id: string): Promise<ICurrencyDocument | null> => {

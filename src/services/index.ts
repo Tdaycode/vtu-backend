@@ -11,6 +11,7 @@ import TokenService from './token.service';
 import CategoryService from './category.service';
 import CurrencyService from './currency.service';
 import { LoggerClient } from './logger.service';
+import SettingsService from './settings.service';
 
 export { 
     CowryService,
@@ -25,5 +26,6 @@ export {
     TokenService,
     CategoryService,
     CurrencyService,
+    SettingsService,
     LoggerClient
 };

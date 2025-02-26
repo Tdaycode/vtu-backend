@@ -7,7 +7,7 @@ import { asyncWrapper } from '../utils/asyncWrapper';
 import { SuccessResponse } from '../utils/SuccessResponse';
 import { BadRequestError } from '../utils/ApiError';
 import { OTPTypes } from '../interfaces/otp.interface';
-import { TwoFATypes } from '../interfaces/user.interface';
+import { AccountStatus, TwoFATypes } from '../interfaces/user.interface';
 import { KYCLevels } from '../interfaces/kyc.interface';
 
 @Service()
@@ -21,6 +21,8 @@ export default class AuthController {
   signIn = asyncWrapper(async (req: Request) => {
     const { email, password } = req.body;
     const { userInfo, twoFA } = await this.userService.signIn(email, password);
+    if(userInfo?.accountStatus === AccountStatus.INACTIVE) 
+      throw new BadRequestError("Account Disabled, Contact Admin");
     if (userInfo?.twoFA?.enabled && !userInfo.firstLogin) {
       return new SuccessResponse(twoFA, 'Complete Two Factor Authentication');
     } else {
@@ -144,23 +146,24 @@ export default class AuthController {
   });
 
   getCurrentUser = asyncWrapper(async (req: Request) => {
-    const user = req.user;
+    const user = await this.userService.getProfile(req.user._id);
     return new SuccessResponse(user, "Current User Fetched");
   });
 
   phoneVerification = asyncWrapper(async (req: Request) => {
     const phoneNumber = req.user.phoneNumber;
     const user = await this.userService.checkVerificationStatus(OTPTypes.phone, phoneNumber);
-    await this.otpService.sendOTP("phone", user);
-    return new SuccessResponse(null, 'OTP sent to Phone Number Successfully');
+
+    const verificationKey = await this.otpService.sendOTP("phone", user);
+    return new SuccessResponse(verificationKey, 'OTP sent to Phone Number Successfully');
   });
 
   verifyPhoneOtp = asyncWrapper(async (req: Request) => {
-    const { otp } = req.body;
+    const { otp, verificationKey } = req.body;
     const phoneNumber = req.user.phoneNumber;
     const userID = req.user._id;
     await this.userService.checkVerificationStatus(OTPTypes.phone, phoneNumber);
-    await this.otpService.verifyPhoneOTP(phoneNumber, otp);
+    await this.otpService.verifyOTP(verificationKey, otp, phoneNumber);
     await this.userService.verifyUser(OTPTypes.phone, phoneNumber);
     await this.userService.upgradeKYCLevel(userID, KYCLevels.Level_1);
     return new SuccessResponse(null, 'Verification Successful');

@@ -9,8 +9,10 @@ import ProductService from '../services/product.service';
 
 import { asyncWrapper } from '../utils/asyncWrapper';
 import { SuccessResponse } from '../utils/SuccessResponse';
-import { IOrderSummaryRequest } from '../interfaces/order.interface';
-import { BadRequestError } from '../utils/ApiError';
+import { IOrderSummaryRequest, OrderStatus } from '../interfaces/order.interface';
+import { BadRequestError, NotFoundError } from '../utils/ApiError';
+import { AccountType, IUserDocument } from '../interfaces/user.interface';
+import { ProductTypes } from '../interfaces/product.interface';
 
 @Service()
 export default class OrderController {
@@ -36,15 +38,66 @@ export default class OrderController {
   });
 
   public getAllOrders = asyncWrapper(async (req: Request) => {
-    const { page, limit, searchTerm } = req.query as { page: string,  limit: string, searchTerm: string};
-    const userId = req.user._id;
-    const orders = await this.orderService.getAllOrders(userId, page, limit, searchTerm);
+    const { page, limit, searchTerm, status } = req.query as { page: string,  limit: string, 
+      searchTerm: string, status: OrderStatus };
+    const user = req.user as IUserDocument;
+    const orders = await this.orderService.getAllOrders(user, page, limit, searchTerm, status);
     return new SuccessResponse(orders, "Orders Fetched Successfully");
   });
 
+  public getOrderStats = asyncWrapper(async (req: Request) => {
+    const { startDate, endDate, status, monthly } = req.query as { startDate: string,  endDate: string, monthly: string, status: OrderStatus };
+    const orders = await this.orderService.getOrderStats(startDate, endDate, status, monthly);
+    return new SuccessResponse(orders, "Orders Stats Fetched Successfully");
+  });
+
   public getOrderById = asyncWrapper(async (req: Request) => {
+    const user = req.user;
     const userId = req.user._id;
-    const order = await this.orderService.getOrderByCredentials({ _id: new ObjectId(req.params.id), userId: new ObjectId(userId) });
+    let filter: any = { _id: new ObjectId(req.params.id) };
+    if(user?.accountType === AccountType.USER) {
+      filter = { ...filter, userId: new ObjectId(userId) };
+    }
+    const order = await this.orderService.getOrderByCredentials(filter);
     return new SuccessResponse(order, "Order fetched Successfully");
+  });
+
+  public getOrderByRef = asyncWrapper(async (req: Request) => {
+    const user = req.user;
+    const userId = req.user._id;
+    let filter: any = { orderNumber: req.params.id };
+    if(user?.accountType === AccountType.USER) {
+      filter = { ...filter, userId: new ObjectId(userId) };
+    }
+    const order = await this.orderService.getOrderByCredentials(filter);
+    return new SuccessResponse(order, "Order fetched Successfully");
+  });
+
+  public cancelOrder = asyncWrapper(async (req: Request) => {
+    const user = req.user;
+    const userId = req.user._id;
+    let filter: any;
+    if(user?.accountType === AccountType.USER) 
+      filter = { _id: new ObjectId(req.params.id), userId: new ObjectId(userId) };
+    else filter = { _id: new ObjectId(req.params.id) };
+    const order = await this.orderService.cancelOrderByCredentials(filter);
+    return new SuccessResponse(order, "Order cancelled Successfully"); 
+  });
+
+  public refundOrder = asyncWrapper(async (req: Request) => {
+    const orderId = req.params.id;
+    const order = await this.orderService.getSingleOrder({ _id: orderId });
+    if(!order) throw new NotFoundError("Order Not Found");
+    await this.orderService.refundUserWallet(order);
+    return new SuccessResponse("Order refunded Successfully"); 
+  });
+
+  public fulfillOrder = asyncWrapper(async (req: Request) => {
+    const orderId = req.params.id;
+    const comment = req.body.comment;
+    const order = await this.orderService.getSingleOrder({ _id: orderId, status: OrderStatus.Pending, type: ProductTypes.Manual });
+    if(!order) throw new NotFoundError("Order Not Found");
+    await this.orderService.fulfillManualOrder(order, comment);
+    return new SuccessResponse("Order fulfilled Successfully"); 
   });
 }

@@ -1,4 +1,4 @@
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsLowercase, Matches, MinLength } from 'class-validator';
 
 export class UpdateProfileValidation {
   @IsOptional()
@@ -8,5 +8,10 @@ export class UpdateProfileValidation {
   lastName: string;
 
   @IsOptional()
+  @IsLowercase()
+  @MinLength(6)
+  @Matches(/^[^\s]+$/, {
+    message: 'Username should be in lowercase and not contain any spaces',
+  })
   userName: string;
 }

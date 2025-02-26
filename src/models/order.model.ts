@@ -15,7 +15,7 @@ const orderSchema: Schema<IOrder> = new Schema(
     },
     paymentId: {
       type: Schema.Types.ObjectId,
-      ref: "Order",
+      ref: "Payment",
     }, 
     product: {
       id: {
@@ -25,6 +25,8 @@ const orderSchema: Schema<IOrder> = new Schema(
       },
       externalId: { type: String, required: true },
       name: { type: String },
+      provider: { type: String },
+      imageUrl: { type: String },
       type: { type: String },
       amount: { type: Number }
     },

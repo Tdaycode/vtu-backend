@@ -14,8 +14,8 @@ export default class CurrencyService {
     public exchangeRateProvider: ExchangeRateProvider
   ) {}
 
-  getAllCurrency = async () => {
-    return await this.currencyRepository.findAll();
+  getAllCurrency = async (filter = {}) => {
+    return await this.currencyRepository.findAll(filter);
   };
 
   public getCurrency = async (code: string) => {
@@ -86,4 +86,14 @@ export default class CurrencyService {
     const amountCOY = await this.convertLocalCurrency(amountUSD, ICurrencyTypes.US_DOLLARS, ICurrencyTypes.COWRY);
     return amountCOY;
   }
+
+  convertCurrencyToNGN = async (amount: number, currency: string): Promise<string> => {
+    const baseCurrency = "USD";
+    const result = await this.convertCurrency(amount, currency, baseCurrency);
+
+    const NGN = await this.convertNGNCurrency(Number(result), baseCurrency);
+    const finalAmount = ((Big(NGN).times(0.03)).add(NGN)).toString();
+    return finalAmount; 
+  }
+
 }

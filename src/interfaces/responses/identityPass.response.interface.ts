@@ -1,46 +1,92 @@
-export interface IdentityPassKYCProviderResponse {
+interface IdentityPassBaseResponse {
   status: boolean;
-  detail: string;
   response_code: string;
+  detail: string;
   face_data: FaceData;
-  bvn_data: BvnData;
-  verification: Verification;
+  widget_info: UserInfo;
 }
 
-interface FaceData {
-  status: boolean;
-  message: string;
+export interface IdentityPassBVNResponse extends IdentityPassBaseResponse {
+  data: BvnData,
 }
 
-interface BvnData {
-  title: string;
-  gender: string;
-  maritalStatus: string;
-  watchListed: string;
-  levelOfAccount: string;
-  bvn: string;
-  firstName: string;
-  middleName: string;
-  lastName: string;
-  dateOfBirth: string;
-  phoneNumber1: string;
-  phoneNumber2: string;
-  registrationDate: string;
-  enrollmentBank: string;
-  enrollmentBranch: string;
-  email: string;
-  lgaOfOrigin: string;
-  lgaOfResidence: string;
-  nin: string;
-  nameOnCard: string;
-  nationality: string;
-  residentialAddress: string;
-  stateOfOrigin: string;
-  stateOfResidence: string;
-  base64Image: string;
+export interface IdentityPassGeneralResponse extends IdentityPassBaseResponse {
+  data: GeneralIdentityData,
+  request_data: GeneralRequestData
 }
 
-interface Verification {
-  status: string;
-  reference: string;
+export interface BvnData {
+  bvn: string
+  firstName: string
+  middleName: string
+  lastName: string
+  dateOfBirth: string
+  registrationDate: string
+  enrollmentBank: string
+  enrollmentBranch: string
+  email: string
+  gender: string
+  levelOfAccount: string
+  lgaOfOrigin: string
+  lgaOfResidence: string
+  maritalStatus: string
+  nin: string
+  nameOnCard: string
+  nationality: string
+  phoneNumber1: string
+  phoneNumber2: string
+  residentialAddress: string
+  stateOfOrigin: string
+  stateOfResidence: string
+  title: string
+  watchListed: string
+  base64Image: string
 }
+
+export interface FaceData {
+  status: boolean
+  response_code: string
+  message: string
+  confidence: number,
+  liveliness_confidence: number
+}
+
+export interface UserInfo {
+  first_name: string
+  last_name: string
+  email: string
+  user_ref: string
+}
+
+export interface BVNRequestData {
+  number: string
+  image: string
+}
+
+export interface GeneralRequestData {
+  doc_country: string
+  doc_type: string,
+  doc_image: string,
+  image: string
+}
+
+export interface GeneralIdentityData {
+  fullName: string
+  first_name: string
+  last_name: string
+  gender: string
+  dob: string
+  address: any
+  document_name: any
+  documentNumber: string
+  documentType: string
+  documentCountry: string
+  nationality: string
+  issuer: string
+  place_of_issue: any
+  date_of_issue: string
+  age: string
+  expirationDate: string
+  device: {}
+}
+

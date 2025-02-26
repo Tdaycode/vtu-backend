@@ -4,6 +4,7 @@ import { BettingTransformer } from './betting/index';
 import { ElectricityTransformer } from './electricity/index';
 import { InternetTransformer } from './internet/index';
 import { TVTransformer } from './tv/index';
+import { ManualProductTransformer } from './manual/index';
 
 export { 
     AirtimeTransformer,
@@ -11,5 +12,6 @@ export {
     BettingTransformer,
     ElectricityTransformer,
     InternetTransformer,
-    TVTransformer
+    TVTransformer,
+    ManualProductTransformer
 }

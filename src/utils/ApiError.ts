@@ -18,6 +18,12 @@ export class NotFoundError extends ApiError {
   }
 }
 
+export class NotFoundDocError extends ApiError {
+  constructor(message: string) {
+    super(StatusCodes.NOT_FOUND, message);
+  }
+}
+
 export class BadRequestError extends ApiError {
   constructor(message: string) {
     super(StatusCodes.BAD_REQUEST, message);

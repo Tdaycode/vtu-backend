@@ -1,10 +1,13 @@
 import { TVFormattedProductInfo } from '../../../interfaces/formatted/product-info.interface';
 import Big from 'big.js';
+import { transformTVPackage } from '../../../utils/helpers';
+import { ProductIDs } from '../../../interfaces/product.interface';
 
 export function primeairtimeTVTransformer(data: any): TVFormattedProductInfo {
   let serviceData = {} as TVFormattedProductInfo;
 
-  if(data?.productName === "GOTV" || data?.productName === "DSTV") {
+  if(data?.product_id === ProductIDs.PRIME_AIRTIME_GOTV || 
+    data?.product_id === ProductIDs.PRIME_AIRTIME_DSTV) {
     const customerInfo = {
       first_name: data.first_name,
       last_name: data.last_name,
@@ -31,10 +34,11 @@ export function primeairtimeTVTransformer(data: any): TVFormattedProductInfo {
       currency: dataElement.topup_currency,
       amount: dataElement.topup_value,
       hasOpenRange: false,
-      name: data?.productName === "StarTimes" ? dataElement.name : dataElement.description,
-      product_id: data?.productName === "StarTimes" ? dataElement.code : dataElement.product_id,
+      name: data?.product_id === ProductIDs.PRIME_AIRTIME_SHOWMAX || ProductIDs.PRIME_AIRTIME_STARTIMES ? 
+        transformTVPackage(dataElement.name, dataElement?.subscription_months) : dataElement.description,
+      product_id: data?.productName === ProductIDs.PRIME_AIRTIME_SHOWMAX || ProductIDs.PRIME_AIRTIME_STARTIMES ? dataElement.code : dataElement.product_id,
     }
-  });
+  }); 
 
   if(data?.validate) {
     const isFound = newArr.some(item => {

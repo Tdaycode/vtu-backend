@@ -8,7 +8,7 @@ export class CreatePaymentValidation extends CreateOrderValidation {
   @IsEnum(PaymentTypes)
   type: PaymentTypes;
 
-  @ValidateIf(o => o.type === PaymentTypes.Cowry)
+  @ValidateIf(o => (o.type === PaymentTypes.Cowry || o.type === PaymentTypes.Wallet))
   @IsNotEmpty()
   @IsString()
   @Length(4,4)

@@ -1,4 +1,4 @@
-import { ExtraMap, ServiceProvider } from '../interfaces/provider.interface';
+import { ExtraMap, IFulfillOrder, IGetServiceInfo, ServiceProvider } from '../interfaces/provider.interface';
 import { HttpClient } from '../utils/http-client.util';
 import { uuid } from 'uuidv4';
 import config from '../config/Config';
@@ -8,13 +8,19 @@ import { PrimeAirtimeAccessTokenResponse, PrimeAirtimeTopUpInfoResponse, PrimeAi
   PrimeAirtimeBettingValidationResponse, PrimeAirtimeProductResponse, PrimeAirtimeElectricityValidationResponse } from '../interfaces/responses/primeAirtime.response.interface';
 import { TokenTypes } from '../interfaces/token.interface';
 import { encode, decode } from '../utils/crypto';
-import { ProductTypes, ServiceTypes } from '../interfaces/product.interface';
+import { ProductIDs, ProductTypes, ServiceTypes } from '../interfaces/product.interface';
 import { BadRequestError } from '../utils/ApiError';
-import { OrderStatus } from '../interfaces/order.interface';
+import { IOrder, OrderStatus } from '../interfaces/order.interface';
 
 @Service()
 export class PrimeAirtimeProvider implements ServiceProvider {
-  public async getAirtimeTopUpInfo(phoneNumber: string) {
+  public async getAirtimeTopUpInfo(phoneNumber: string, product_id: string) {
+    if(product_id === ProductIDs.PRIME_AIRTIME_SMILE_RECHARGE) {
+      const payload = { receipient: phoneNumber, productType: ProductTypes.Internet, serviceId: ServiceTypes.Internet, product_id }
+      const response = await this.getBillPayment(payload);
+      return response;
+    }
+
     const url = `${config.primeAirtimeBaseUrl}/topup/info/${phoneNumber}`;
     const accessToken = await this.retrieveAccessToken();
 
@@ -27,34 +33,49 @@ export class PrimeAirtimeProvider implements ServiceProvider {
     return response;
   }
 
-  public async fulfillOrder(type: string, productId: string, amount: number, recipient: string, extra: ExtraMap) {
+  public async fulfillOrder(payload: IFulfillOrder) {
+    const { productType: type, productId, amount, order } = payload;
     const reference = uuid();
-    let response: PrimeAirtimeExecuteTopUpResponse, data: any = {};
+    let response: PrimeAirtimeExecuteTopUpResponse, data: any = {}; 
 
-    if(config.activeEnvironment === "development") return { reference, data };
+    // if(config.activeEnvironment === "development") return { reference, data };
 
     switch (type) {
-      case ProductTypes.Airtime || ProductTypes.Data:
-        response = await this.executeAirtimeTopUp(type, recipient, productId, amount.toString(), reference);
+      case ProductTypes.Airtime:
+        response = await this.executeAirtimeTopUp(order, productId, amount.toString(), reference);
+        break;
+
+      case ProductTypes.Data:
+        response = await this.executeAirtimeTopUp(order, productId, amount.toString(), reference);
         break;
 
       case ProductTypes.Electricity:
-        const prepaid = extra.prepaid;
-        response = await this.executeElectricityTopUp(recipient, productId, amount.toString(), reference, prepaid);
-        if(response?.pin_based) {
+        const prepaid = order.prepaid;
+        response = await this.executeElectricityTopUp(order.recipient, productId, amount.toString(), reference, prepaid);
+        if(response?.pin_code) {
           data = {
             "Electricity PIN": response?.pin_code,
-            "PIN Message": response?.pin_option1
+            "PIN Message": response?.pin_option1 ?? "Use the Voucher/PIN"
           };
         }
         break;
 
       case ProductTypes.TV:
-        response = await this.executeTVTopUp(recipient, productId, reference);
+        response = await this.executeTVTopUp(order, productId, reference);
+        if(response?.pin_code) {
+          data = {
+            [`${order.product.name } PIN`]: response?.pin_code,
+            "PIN Message": response?.pin_option1 ?? "Use the Voucher/PIN"
+          };
+        }
         break;
 
       case ProductTypes.Betting:
-        response = await this.executeBettingTopUp(recipient, amount.toString(), productId, reference);
+        response = await this.executeBettingTopUp(order.recipient, amount.toString(), productId, reference);
+        break;
+
+      case ProductTypes.Internet:
+        response = await this.executeInternetTopUp(order, amount.toString(), productId, reference);
         break;
 
       default:
@@ -71,6 +92,8 @@ export class PrimeAirtimeProvider implements ServiceProvider {
       orderStatus = OrderStatus.Failed
     }
 
+
+    console.log({ reference, data, orderStatusMessage: response.message, orderStatus })
     return { reference, data, orderStatusMessage: response.message, orderStatus };    
   }
 
@@ -87,30 +110,31 @@ export class PrimeAirtimeProvider implements ServiceProvider {
     return response;
   }
 
-  public async getBettingInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string) {
-    const response = await this.getBillPayment(receipient, productType, serviceId, product_id)
+  public async getBettingInfo(payload: IGetServiceInfo) {
+    const response = await this.getBillPayment(payload)
     return response;
   }
 
-  public async getInternetInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string) {
-    const response = await this.getBillPayment(receipient, productType, serviceId, product_id)
+  public async getInternetInfo(payload: IGetServiceInfo) {
+    const response = await this.getBillPayment(payload)
     return response;
   }
 
-  public async getElectricityInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string) {
-    const response = await this.getBillPayment(receipient, productType, serviceId, product_id)
+  public async getElectricityInfo(payload: IGetServiceInfo) {
+    const response = await this.getBillPayment(payload)
     return response;
   }
 
-  public async getTVInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string) {
-    const response = await this.getBillPayment(receipient, productType, serviceId, product_id)
+  public async getTVInfo(payload: IGetServiceInfo) {
+    const response = await this.getBillPayment(payload)
     return response;
   }
 
-  public async getBillPayment(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string) {
+  public async getBillPayment(payload: IGetServiceInfo) {
+    const { productType, serviceId, receipient, product_id } = payload;
     let result: any, info: any
 
-    if(product_id === "BPE-NGCABENIN-OR") {
+    if(product_id === ProductIDs.PRIME_AIRTIME_BENIN) {
       const product = [{
         currency: "NGN",
         max_denomination: "300000",
@@ -128,7 +152,7 @@ export class PrimeAirtimeProvider implements ServiceProvider {
     const product = services.products.filter(item => item.product_id === product_id);
     if(product[0]?.hasValidate) {
       if(productType === ProductTypes.Betting) result = await this.validateBettingInput(receipient, product_id);
-      if(productType === ProductTypes.TV && product[0].name.includes("DSTV") || product[0].name.includes("GOTV")) {
+      if(productType === ProductTypes.TV && product_id === ProductIDs.PRIME_AIRTIME_DSTV || product_id === ProductIDs.PRIME_AIRTIME_GOTV) {
         const data = await this.validateTVInput(receipient);
         result = { ...data, productName: product[0].name, products: data.upgrades };
         delete result["upgrades"];
@@ -213,10 +237,14 @@ export class PrimeAirtimeProvider implements ServiceProvider {
     }
   }
 
-  public async executeAirtimeTopUp(type: string, phoneNumber: string, product_id: string, denomination: string, reference: string) {
+  public async executeAirtimeTopUp(order: IOrder, product_id: string, denomination: string, reference: string) {
     try {
-      const productType = ProductTypes.Airtime ? "topup" : "datatopup";
-      const url = `${config.primeAirtimeBaseUrl}/${productType}/exec/${phoneNumber}`;
+      if(product_id === ProductIDs.PRIME_AIRTIME_SMILE_RECHARGE) {
+        return await this.executeInternetTopUp(order, denomination.toString(), product_id, reference);
+      }
+
+      const productType = order.product.type === ProductTypes.Airtime ? "topup" : "datatopup";
+      const url = `${config.primeAirtimeBaseUrl}/${productType}/exec/${order.recipient}`;
       const accessToken = await this.retrieveAccessToken();
       const headers = { Authorization: `Bearer ${accessToken}` };
   
@@ -250,12 +278,19 @@ export class PrimeAirtimeProvider implements ServiceProvider {
     }
   }
 
-  public async executeTVTopUp(cardNumber: string, product_id: string, reference: string) {
+  public async executeTVTopUp(order: IOrder, product_id: string, reference: string) {
     try {
-      const url = `${config.primeAirtimeBaseUrl}/billpay/dstvnew/${cardNumber}`;
+      let url: string;
+      let body: ExtraMap = { product_id, customer_reference: reference };
+      if(product_id === ProductIDs.PRIME_AIRTIME_SHOWMAX)  {
+        url = `${config.primeAirtimeBaseUrl}/billpay/showmax`;
+        body = { amount: product_id, customer_reference: reference }
+      } else {
+        url = `${config.primeAirtimeBaseUrl}/billpay/dstvnew/${order.recipient}`;
+      }
+        
       const accessToken = await this.retrieveAccessToken();
       const headers = { Authorization: `Bearer ${accessToken}` };
-      const body = { product_id, customer_reference: reference };
   
       const response = await new HttpClient(url).post<PrimeAirtimeExecuteTopUpResponse>('', body, headers);
       return response;
@@ -270,6 +305,20 @@ export class PrimeAirtimeProvider implements ServiceProvider {
       const accessToken = await this.retrieveAccessToken();
       const headers = { Authorization: `Bearer ${accessToken}` };
       const body = { product_id, customer_reference: reference, amount };
+  
+      const response = await new HttpClient(url).post<PrimeAirtimeExecuteTopUpResponse>('', body, headers);
+      return response;
+    } catch (error: any) {
+      throw Error(error)
+    }
+  }
+
+  public async executeInternetTopUp(order: IOrder, amount: string, product_id: string, reference: string) {
+    try {
+      const url = `${config.primeAirtimeBaseUrl}/billpay/internet/${product_id}/${amount}`;
+      const accessToken = await this.retrieveAccessToken();
+      const headers = { Authorization: `Bearer ${accessToken}` };
+      const body = { meter: order.recipient, customer_reference: reference };
   
       const response = await new HttpClient(url).post<PrimeAirtimeExecuteTopUpResponse>('', body, headers);
       return response;

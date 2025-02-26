@@ -2,7 +2,7 @@
 
 <br />
 <div align="center">
-  <h2 align="center">Telebank Backend </h2>
+  <h2 align="center">TeleBank Backend </h2>
 </div>
 
 

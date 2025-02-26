@@ -1,6 +1,7 @@
 import { Service } from 'typedi';
+import { Providers } from '../../interfaces/product.interface';
 import { GiftCardProvider } from '../../interfaces/provider.interface';
-import { TelebankProvider } from '../../providers';
+import { TeleBankProvider, ValueTopupProvider } from '../../providers';
 import { GiftlyProvider } from '../../providers/giftly.provider';
 import { NotFoundError } from '../../utils/ApiError';
 
@@ -11,8 +12,9 @@ type GiftCardProviderMap = {
 @Service()
 export class  GiftCardProviderFactory {
   static factories: GiftCardProviderMap = {
-    giftly: new GiftlyProvider(),
-    telebank: new TelebankProvider()
+    [Providers.Giftly]: new GiftlyProvider(),
+    [Providers.TeleBank]: new TeleBankProvider(),
+    [Providers.ValueTopup]: new ValueTopupProvider(),
   };
 
   static getProvider(factoryName: string): GiftCardProvider {

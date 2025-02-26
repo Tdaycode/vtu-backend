@@ -1,14 +1,10 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsEnum } from 'class-validator';
+import { OrderStatus } from '../../interfaces/order.interface';
+import { GetAllItemsValidation } from '../common/getAllItems.validation';
 
-export class GetOrdersValidation {
+export class GetOrdersValidation extends GetAllItemsValidation {
+  @IsEnum(OrderStatus)
   @IsOptional()
-  page: Number;
-
-  @IsOptional()
-  limit: Number;
-
-  @IsString()
-  @IsOptional()
-  searchTerm: string;
+  status: OrderStatus;
 }
 

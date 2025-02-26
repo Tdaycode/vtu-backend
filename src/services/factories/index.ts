@@ -5,6 +5,7 @@ import { GiftCardProviderFactory } from './giftcard.factory';
 import { InternetProviderFactory } from './internet.factory';
 import { TVProviderFactory } from './tv.factory';
 import { DataProviderFactory } from './data.factory';
+import { ManualProviderFactory } from './manual.factory';
 
 export { 
     AirtimeProviderFactory,
@@ -13,5 +14,6 @@ export {
     GiftCardProviderFactory,
     InternetProviderFactory,
     TVProviderFactory,
-    DataProviderFactory
+    DataProviderFactory,
+    ManualProviderFactory
 }

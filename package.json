@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "engines": {
+    "node": ">=14.20.1"
+  },
   "scripts": {
     "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --files --exit-child src/index.ts",
     "build": "rimraf ./dist && cross-env NODE_ENV=production tsc && npm run templates && npm run db:seed",
@@ -17,6 +20,7 @@
   "devDependencies": {
     "@tsconfig/node16": "^1.0.2",
     "@types/bcrypt": "^5.0.0",
+    "@types/big.js": "^6.2.0",
     "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
@@ -42,11 +46,15 @@
     }
   },
   "dependencies": {
+    "@hokify/agenda": "^6.3.0",
     "@sendgrid/mail": "^7.7.0",
+    "agenda": "^5.0.0",
+    "agendash": "^4.0.0",
     "bcrypt": "^5.1.0",
     "big.js": "^6.2.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "cloudinary": "^1.37.0",
     "cors": "^2.8.5",
     "country-to-currency": "^1.0.8",
     "cross-env": "^7.0.3",
@@ -56,13 +64,14 @@
     "googleapis": "^100.0.0",
     "http-status-codes": "^2.2.0",
     "iso-3166-1-alpha-2": "^1.0.1",
+    "iso-country-currency": "^0.7.2",
     "jsonfile": "^6.1.0",
     "jsonwebtoken": "^9.0.0",
     "mjml-utils": "^2.2.1",
     "mongoose": "^6.9.1",
     "mongoose-paginate-v2": "^1.7.1",
     "morgan": "^1.10.0",
-    "multer": "^1.4.4",
+    "multer": "^1.4.5-lts.1",
     "order-id": "^2.1.2",
     "otp-generator": "^4.0.1",
     "qrcode": "^1.5.1",
