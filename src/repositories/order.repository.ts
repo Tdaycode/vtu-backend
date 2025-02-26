@@ -1,10 +1,11 @@
 import { Order, PaginatedOrder } from '../models/order.model';
 import { Service } from 'typedi';
 import { IOrderDocument, IOrder } from '../interfaces/order.interface';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 @Service()
 export default class OrderRepository {
-  create = async (data: IOrder): Promise<IOrderDocument> => {
+  create = async (data: any): Promise<IOrderDocument> => {
     const order = new Order(data);
     return await order.save();
   };
@@ -13,15 +14,16 @@ export default class OrderRepository {
     return await Order.find(filter).lean();
   };
   
-  findAllWithPagination = async (filter: any = {}, skip: number, limit: number) => {
+  findAllWithPagination = async (filter: any = {}, populate: any = {}, skip: number, limit: number) => {
     const options = {
       sort: { createdAt: -1 },
+      populate,
       lean: true,
       leanWithId: false,
       offset: skip,
       limit: limit
     };
-    return await PaginatedOrder.paginate(filter, options);
+    return await PaginatedOrder.paginate(filter, options); 
   };
 
   findById = async (id: string): Promise<IOrderDocument | null> => {
@@ -29,8 +31,8 @@ export default class OrderRepository {
   };
 
 
-  findOne = async (filter: any): Promise<IOrderDocument | null> => {
-    return await Order.findOne(filter);
+  findOne = async (filter: FilterQuery<IOrderDocument>, query: QueryOptions<IOrderDocument> = {}): Promise<IOrderDocument | null> => {
+    return await Order.findOne(filter, {}, query);
   };
 
   aggregate = async (filter: any[]): Promise<any[]> => {

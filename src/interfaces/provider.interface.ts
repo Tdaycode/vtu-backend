@@ -1,3 +1,4 @@
+import { IOrder } from './order.interface';
 import { IPaymentDocument } from './payment.interface';
 import { ProductTypes, ServiceTypes } from './product.interface';
 import { IUserDocument } from './user.interface';
@@ -10,20 +11,39 @@ export type ExtraMap = {
   [key: string]: any;
 };
 
+export interface IFulfillOrder {
+  productType?: string;
+  productId: string;
+  amount: number;
+  order: IOrder;
+}
+
+export interface IGetServiceInfo {
+  receipient: string;
+  productType: ProductTypes;
+  serviceId: ServiceTypes;
+  product_id: string;
+} 
+
 export interface ServiceProvider {
-  getAirtimeTopUpInfo(id: string): any;
+  getAirtimeTopUpInfo(id: string, product_id?: string): any;
   getDataTopUpInfo(id: string): any;
-  getBettingInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string): any;
-  getElectricityInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string): any;
-  getTVInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string): any;
-  getInternetInfo(receipient: string, productType: ProductTypes, serviceId: ServiceTypes, product_id: string): any;
+  getBettingInfo(payload: IGetServiceInfo): any;
+  getElectricityInfo(payload: IGetServiceInfo): any;
+  getTVInfo(payload: IGetServiceInfo): any;
+  getInternetInfo(payload: IGetServiceInfo): any;
   getBillPaymentInfo(id: string): any;
-  fulfillOrder(productType: string, productId: string, amount: number, recipient: string, extra?: ExtraMap): any;
+  fulfillOrder(payload: IFulfillOrder): any;
 }
 
 export interface GiftCardProvider {
   getCatalogAvailability(product_sku: string, price: number): any;
-  fulfillOrder(productId: string, amount: number, recipient: string): any;
+  fulfillOrder(payload: IFulfillOrder): any;
+}
+
+export interface ManualProductProvider {
+  getManualProductAvailability(): boolean;
+  fulfillOrder(payload: IFulfillOrder): any;
 }
 
 export interface PaymentProvider {

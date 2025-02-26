@@ -14,6 +14,8 @@ export function IsValidCountryCode(validationOptions?: ValidationOptions) {
             return false;
           }
 
+          if(value === "GLC") return true;
+
           const country = iso3311a2.getCountry(value) 
           const result = country ? true : false;
           return result;

@@ -2,7 +2,7 @@ import { BettingFormattedProductInfo } from '../../../interfaces/formatted/produ
 import Big from 'big.js';
 
 export function primeairtimeBettingTransformer(data: any): BettingFormattedProductInfo {
-  const serviceData = {} as BettingFormattedProductInfo;
+  let serviceData = {} as BettingFormattedProductInfo;
   
   serviceData.type = data.type;
   serviceData.customerId = data.customerId;

@@ -19,3 +19,14 @@ export class VerifyOtpValidation {
   @IsEnum(OTPTypes)
   type: OTPTypes;
 }
+
+
+export class VerifyPhoneOtpValidation {
+  @IsString()
+  @IsNotEmpty()
+  otp: string;
+
+  @IsNotEmpty()
+  @IsString()
+  verificationKey: string;
+}

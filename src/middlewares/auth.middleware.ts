@@ -1,21 +1,22 @@
 import { Response, Request, NextFunction } from 'express';
-import dayjs from "dayjs";
 import { BadRequestError, UnAuthorizedError } from '../utils/ApiError';
 import { Service } from 'typedi';
 import TokenService from '../services/token.service';
 import UserRepository from '../repositories/user.repository';
 import { LoggerClient } from '../services/logger.service';
-import { hashString } from '../utils/crypto';
-import { IUSerIdentity, TwoFATypes } from '../interfaces/user.interface';
+import { AccountStatus, AccountType, IUser, TwoFATypes } from '../interfaces/user.interface';
 import { PinService } from '../services/pin.service';
 import OTPService from '../services/otp.service';
 import KYCService from '../services/kyc.service';
+import { SettingsService } from '../services';
+import { SettingsType } from '../interfaces/settings.interface';
 
 @Service()
 export default class AuthMiddleware {
   constructor(
     public userRepository: UserRepository, 
     public otpService: OTPService, 
+    public settingsService: SettingsService, 
     public kycService: KYCService, 
     public logger: LoggerClient
   ) {}
@@ -32,57 +33,19 @@ export default class AuthMiddleware {
       // Verify and decode token
       const decodedToken = TokenService.verifyToken(idToken);
       const user = await this.userRepository.getUser({ _id: decodedToken.sub })
-      console.log('PATH==>', req.path);
       if (!user) {
         next(new UnAuthorizedError('Unauthorized'));
       }
 
+      if(user?.accountStatus === AccountStatus.INACTIVE) 
+        next(new UnAuthorizedError("Account Disabled, Contact Admin"));
+
       if (user?.twoFA.needed && req.path !== "/verify-2fa") {
-       
         next(new UnAuthorizedError('Two Factor Authentication Required'));
       }
   
       // Assign user ID to req user propery
       req.user = user;
-      next();
-    } catch (error) {
-      next(new UnAuthorizedError('Unauthorized'))
-    }
-  };
-
-  public validateExistingUserIdentity = async (req: Request, res: Response, next: NextFunction) => {
-    const { channel, request_data, nin_data, bvn_data } = req.body;
-    try {
-      let identity: IUSerIdentity = {
-        identityHash: "",
-        imageURL: "",
-        dob: new Date()
-      }; 
-  
-      if(channel === "BVN") {
-        const identityHash = hashString(request_data["number"]);
-        identity = {
-          identityHash,
-          imageURL: request_data.image,
-          dob: dayjs(bvn_data.dateOfBirth).toDate()
-        }
-      }
-
-      if(channel === "NIN") {
-        const identityHash = hashString(request_data["number_nin"]);
-        identity = {
-          identityHash,
-          imageURL: request_data.image,
-          dob: dayjs(nin_data.birthdate).toDate()
-        }
-      }
-
-      if(!identity) next(new BadRequestError('Identity required')); 
-            
-      const user = await this.userRepository.getUser({ identityHash: identity.identityHash })
-      if(user) next(new BadRequestError('Identity already in use')); 
-      
-      req.identity = identity;
       next();
     } catch (error) {
       next(new UnAuthorizedError('Unauthorized'))
@@ -161,6 +124,23 @@ export default class AuthMiddleware {
       next(new UnAuthorizedError(error.message))
     }
   };
+  
+  public checkSpendingStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as IUser ;
+    try {  
+      if (!user) {
+        next(new UnAuthorizedError('Unauthorized'));
+      }
+      
+      if (!user?.isSpendingEnabled) {
+        next(new BadRequestError('Spending Disabled, Contact Admin'));
+      }
+
+      next();
+    } catch (error: any) {
+      next(new UnAuthorizedError(error.message))
+    }
+  };
 
   public validatePin = async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user ;
@@ -197,7 +177,7 @@ export default class AuthMiddleware {
   };
 
   public validateAdminUser = async (req: Request, res: Response, next: NextFunction) => {
-    let idToken;
+    let idToken = "";
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       idToken = req.headers.authorization.split('Bearer ')[1];
     } else {
@@ -212,16 +192,14 @@ export default class AuthMiddleware {
         next(new UnAuthorizedError('Unauthorized'));
       }
 
-      if (user?.accountType !== "ADMIN") {
-        console.log('USER TYPE===>',user?.accountType)
+      if (user?.accountType !== AccountType.ADMIN) {
         next(new UnAuthorizedError('Unauthorized as admin'));
       }
 
       req.user = user;
-
+      next();
     } catch(error) {
-    next(new UnAuthorizedError('Unauthorized as admin'));
-
+     next(new UnAuthorizedError('Unauthorized as admin'));
     }
   }
 
@@ -234,6 +212,16 @@ export default class AuthMiddleware {
 
       if(!user?.kycLevel) throw new BadRequestError("KYC Not found")
       await this.kycService.checkTransactionLimits(user._id, user.kycLevel);
+      next();
+    } catch (error: any) {
+      next(new UnAuthorizedError(error.message))
+    }
+  };
+
+  public checkUserRegistrationStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {  
+      const result = await this.settingsService.getSettingsByType(SettingsType.disableRegistration);
+      if(result.active) throw new BadRequestError("Registration Disabled, Contact Admin");
       next();
     } catch (error: any) {
       next(new UnAuthorizedError(error.message))

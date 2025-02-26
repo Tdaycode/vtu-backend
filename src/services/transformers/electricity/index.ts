@@ -1,5 +1,6 @@
 import { FormattedProductInfo } from '../../../interfaces/formatted/product-info.interface';
 import { NotFoundError } from '../../../utils/ApiError';
+import { interswitchElectricityTransformer } from './interswitch.electricity.transformer';
 import { primeairtimeElectricityTransformer } from './primeairtime.electricity.transformer';
 
 type TransformerRegister = {
@@ -13,6 +14,7 @@ type ResponseObject = {
 export class ElectricityTransformer {
   static transformers: TransformerRegister = {
     primeairtime: primeairtimeElectricityTransformer,
+    interswitch: interswitchElectricityTransformer,
   };
 
   static electricity(rawData: ResponseObject, provider: string): FormattedProductInfo {

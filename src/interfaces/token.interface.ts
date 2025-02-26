@@ -22,5 +22,7 @@ export enum TokenTypes {
   Refresh = 'refresh',
   Access = 'access',
   PrimeAirtime = 'primeairtime',
+  Interswitch = 'interswitch',
   Giftly = 'giftly',
+  Kuda = 'kuda',
 }

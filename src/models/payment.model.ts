@@ -1,5 +1,6 @@
 import mongoose, { Schema, model } from 'mongoose';
-import { IPayment, PaymentTypes, PaymentStatus } from '../interfaces/payment.interface';
+import mongoosePaginate from 'mongoose-paginate-v2';
+import { IPayment, PaymentTypes, PaymentStatus, IPaymentDocument } from '../interfaces/payment.interface';
 
 // A Schema corresponding to the document interface.
 const paymentSchema: Schema<IPayment> = new Schema(
@@ -15,6 +16,7 @@ const paymentSchema: Schema<IPayment> = new Schema(
     },
     currency: { type: String, default: "NGN" },
     txRef: { type: String, required: true },
+    rate: { type: String },
     paymentMethod: { type: String, enum: PaymentTypes, required: true },
     amount: { type: Number, required: true },
     status: {
@@ -29,6 +31,12 @@ const paymentSchema: Schema<IPayment> = new Schema(
 );
 
 // Payment Model
+paymentSchema.plugin(mongoosePaginate);
+
 const Payment = model<IPayment>('Payment', paymentSchema);
 
-export default Payment;
+const PaginatedPayment = model<IPaymentDocument,
+  mongoose.PaginateModel<IPaymentDocument>
+>('Payment', paymentSchema, 'payments'); 
+
+export { PaginatedPayment, Payment };

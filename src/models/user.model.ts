@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import bcrypt from 'bcrypt';
-import { IUserModel, IUserDocument, TwoFATypes, AccountType } from '../interfaces/user.interface';
+import { IUserModel, IUserDocument, TwoFATypes, AccountType, AccountStatus } from '../interfaces/user.interface';
 import { hashPassword } from '../utils/crypto';
 import { generateUserName } from '../utils/helpers';
 
@@ -13,8 +13,14 @@ const userSchema: Schema<IUserDocument> = new Schema(
     lastName: { type: String, required: true },
     userName: { type: String, unique: true },
     cowryBalance: { type: Number, default: 0 },
+    mainBalance: { type: Number, default: 0 },
+    bankInfo: {
+      bankName: { type: String },
+      accountNumber: { type: String },
+    },
     phoneNumber: { type: String, required: true },
-    country: { type: String, max: 2, required: true },
+    country: { type: String, required: true },
+    currency: { type: String, required: true },
     password: { type: String, required: true },
     firstLogin: { type: Boolean, default: true },
     pin: { type: String, default: null },
@@ -23,13 +29,20 @@ const userSchema: Schema<IUserDocument> = new Schema(
     dob: { type: Date },
     accountType: {
       type: String,
+      default: AccountType.USER,
       enum: AccountType
+    },
+    accountStatus: {
+      type: String,
+      default: AccountStatus.ACTIVE,
+      enum: AccountStatus
     },
     isIdentityVerified: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
+    isSpendingEnabled: { type: Boolean, default: true },
     isPhoneVerified: { type: Boolean, default: false },
+    identityData: { type: Object },
     kycLevel: { type: mongoose.SchemaTypes.ObjectId, ref: 'KYCLevel' },
-
     twoFA: {
       needed: {
         type: Boolean,

@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import { Service } from 'typedi';
+import { ProductTypes } from '../interfaces/product.interface';
 import { UserService, ProductService, CategoryService } from '../services';
 import { asyncWrapper } from '../utils/asyncWrapper';
 import { SuccessResponse } from '../utils/SuccessResponse';
@@ -9,7 +10,7 @@ export default class AuthController {
   constructor(
     public userService: UserService, 
     public productService: ProductService,
-    public categoryService: CategoryService
+    public categoryService: CategoryService 
   ) {}
 
 
@@ -51,4 +52,24 @@ export default class AuthController {
     return new SuccessResponse(orders, "Products Fetched Successfully");
   });
 
+  public editProduct = asyncWrapper(async (req: Request) => {
+    const { id } = req.params;
+    if(req.body.type !== ProductTypes.GiftCard) {
+      delete req.body["maxPrice"];
+      delete req.body["minPrice"];
+    }
+    delete req.body["type"];
+    const product = await this.productService.editProduct(id, req.body);
+    return new SuccessResponse(product, "Product edited Successful");
+  });
+
+  public createProduct = asyncWrapper(async (req: Request) => {
+    const product = await this.productService.createProduct(req.body);
+    return new SuccessResponse(product, "Product created Successful");
+  });
+
+  public syncProducts = asyncWrapper(async (req: Request) => {
+    const products = await this.productService.checkGiftlyCatalogUpdate();
+    return new SuccessResponse(products, "Products Fetched Successfully");
+  });
 }

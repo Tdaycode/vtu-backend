@@ -21,7 +21,7 @@
           <mj-image
             src="https://firebasestorage.googleapis.com/v0/b/i2talk.appspot.com/o/EGIFT-03%201.png?alt=media&token=7c1cdbed-b397-4b5c-b704-f815861eb0cd"
             align="left"
-            alt="Telebank logo"
+            alt="TeleBank logo"
             width="100px"
             href="https://telebank.com"
           />
@@ -43,17 +43,17 @@
 
       <mj-section>
         <mj-column>
-           <mj-text>Thank you for signing up with <strong>Gift Cop</strong>, the ultimate platform for purchasing gift cards and making bill payments. To ensure the security of your account and protect your personal information, we need to verify your email address. </mj-text>
+           <mj-text>Thank you for signing up with <strong>Tele Bank</strong>, the ultimate platform for purchasing gift cards and making bill payments. To ensure the security of your account and protect your personal information, we need to verify your email address. </mj-text>
           
                 <mj-text></mj-text>
           
-          <mj-text>Telebank Email Verification code is <strong>{code}</strong>. It is valid for 30 minutes, one time use only.</mj-text>
+          <mj-text>TeleBank Email Verification code is <strong>{code}</strong>. It is valid for 30 minutes, one time use only.</mj-text>
           
           <mj-text>If you have any questions or concerns regarding this verification process, please do not hesitate to contact our customer support team at <strong>support@telebank.com</strong>.</mj-text>
           
             <mj-text>
             Regards, <br/>
-            The Gift Cop Team
+            The Tele Bank Team
           </mj-text>
         </mj-column>
       </mj-section>

@@ -1,7 +1,10 @@
 import orderId from 'order-id'
+import cloudinary from 'cloudinary';
+import fs from 'fs';
 import config from '../config/Config';
 import { generateFromEmail } from "unique-username-generator";
 import ShortUniqueId from 'short-unique-id';
+import { KYCDocumentTypes } from '../interfaces/kyc-upload.interface';
 
 interface ObjectWithKey {
     [key: string]: any;
@@ -89,9 +92,78 @@ export const removeNameDuplicates = (name: string) => {
   return uniqueName;
 }
 
+export const capitalizeWord = (word: string) => {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+};
+
+export const capitalizeWithUnderscore = (name: string) => {
+  return name
+    .split('_')
+    .map((word) => capitalizeWord(word))
+    .join(' ');
+};
+
+export const transformTVPackage = (name: string, month?: number) => {
+  const packageName = capitalizeWithUnderscore(name);
+  if(!month) return packageName;
+  return `${packageName} - ${month} Month${month > 1 ? 's' : "" }`;
+};
+
 export const responseType = {
   body: 'body',
   query: 'query',
   params: 'params',
   headers: 'headers'
+}
+
+export interface UploadedFile {
+  type: KYCDocumentTypes;
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number;
+}
+
+export const convertUploadedFiles = (input: any): UploadedFile[] => {
+  const output: UploadedFile[] = [];
+
+  for (const type in input) {
+    const files = input[type];
+    files.forEach((file: any) => {
+      const convertedFile: UploadedFile = {
+        ...file, type
+      };
+      output.push(convertedFile);
+    });
+  }
+
+  return output;
+}
+
+export async function uploadFile(filePath: string) {
+  try {
+    const result = await cloudinary.v2.uploader.upload(filePath, { resource_type: "auto" });
+    return result.url;
+  } catch (error: any) {
+    throw Error(error);
+  }
+}
+
+export const removeFiles = (files: any) => {
+  const filesArray = Object.values(files);
+  filesArray.forEach((docs: any) => {
+    docs.forEach((file: { path: fs.PathLike; }) => {
+      fs.unlink(file.path, (err) => {
+        if (err) {
+          console.error(`Failed to remove file: ${file.path}`, err);
+        } else {
+          console.log(`File removed: ${file.path}`);
+        }
+      });
+    });
+  });
 }

@@ -5,9 +5,10 @@ export interface ICurrency extends Document {
     name: string;
     symbol: string;
     expires: Date;
+    isP2P: boolean;
     code: string;
     base: string;
-    rate: number;
+    rate: string;
     status: string;
 } 
 

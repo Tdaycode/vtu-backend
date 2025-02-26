@@ -1,8 +1,10 @@
 import { FormattedProductInfo } from '../../../interfaces/formatted/product-info.interface';
 import Big from 'big.js';
+import { ProductIDs } from '../../../interfaces/product.interface';
 
 export function primeairtimeAirtimeTransformer(data: any): FormattedProductInfo {
   let serviceData = {} as FormattedProductInfo;
+  const isSmile = data?.product_id === ProductIDs.PRIME_AIRTIME_SMILE_RECHARGE;
   
   serviceData.type = data.type;
   serviceData.provider = data.provider;
@@ -11,11 +13,11 @@ export function primeairtimeAirtimeTransformer(data: any): FormattedProductInfo 
   const newArr = serviceData.products.map((element, index) => {
     const dataElement = data.products[index];
     return {
-      currency: dataElement.currency,
-      max_amount: (dataElement.openRangeMax).toString(),
-      min_amount: "50",
+      currency: isSmile ? "NGN" : dataElement.currency,
+      max_amount: isSmile ? dataElement?.max_denomination.toString() : (dataElement.openRangeMax).toString(),
+      min_amount: isSmile ? dataElement?.min_denomination.toString() : "50",
       hasOpenRange: true,
-      name: data.opts.operator,
+      name: isSmile ? "Smile" : data.opts.operator,
       product_id: dataElement.product_id
     }
   });

@@ -7,6 +7,6 @@ export interface ICategory {
     sid?: string
 }
 
-export type ICategoryDocument = Document
+export interface ICategoryDocument extends ICategory, Document {};
 
   

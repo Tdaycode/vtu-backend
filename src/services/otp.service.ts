@@ -10,16 +10,18 @@ import { LoggerClient } from './logger.service';
 import { BadRequestError } from '../utils/ApiError';
 import config from '../config/Config';
 import { encode, decode } from '../utils/crypto';
-import { initatePhoneVerification, verifyCode } from '../utils/twilio';
+import { verifyCode } from '../utils/twilio';
 
 import { IUserDocument } from '../interfaces/user.interface';
 import { OTPDetails } from '../interfaces/otp.interface';
+import { SendChampProvider } from '../providers/sendchamp.provider';
 
 @Service()
 export default class OTPService {
   constructor(
     public otpRepository: OtpRepository,
     public notificationService: NotificationService,
+    public sendChampProvider: SendChampProvider,
     public logger: LoggerClient,
   ) {}
 
@@ -40,19 +42,19 @@ export default class OTPService {
 
     const name = user.firstName + ' ' + user.lastName;
     const email = user.email;
-    details.entity = user.email;
     
     if (type === 'email') {
+      details.entity = user.email;
       if (twoFA) {
         await this.notificationService.sendtwoFAEmail(name, otp, email);
       } else {
         await this.notificationService.sendEmailVerificationEmail(name, otp, email);
       }
-    }
+    } 
 
     if (type === "phone") { 
-      await initatePhoneVerification(user.phoneNumber);
-      return true;
+      details.entity = user.phoneNumber;
+      await this.sendChampProvider.sendOTP(user.phoneNumber, otp);
     }
 
     if (type === 'forgotPassword') await this.notificationService.sendForgotPasswordEmail(name, otp, email);

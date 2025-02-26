@@ -1,6 +1,9 @@
 import { FormattedProductInfo } from '../../../interfaces/formatted/product-info.interface';
 import { NotFoundError } from '../../../utils/ApiError';
 import { primeairtimeAirtimeTransformer } from '../airtime/primeairtime.airtime.transformer';
+import { interswitchAirtimeTransformer } from '../airtime/interswitch.airtime.transformer';
+import { Providers } from '../../../interfaces/product.interface';
+import { valueTopUpAirtimeTransformer } from './valuetopup.airtime.transformer';
 
 type TransformerRegister = {
   [key: string]: (data: any) => FormattedProductInfo;
@@ -12,7 +15,9 @@ type ResponseObject = {
 
 export class AirtimeTransformer {
   static transformers: TransformerRegister = {
-    primeairtime: primeairtimeAirtimeTransformer,
+    [Providers.PrimeAirtime]: primeairtimeAirtimeTransformer,
+    [Providers.Interswitch]: interswitchAirtimeTransformer,
+    [Providers.ValueTopup]: valueTopUpAirtimeTransformer,
   };
 
   static airtime(rawData: ResponseObject, provider: string): FormattedProductInfo | boolean {

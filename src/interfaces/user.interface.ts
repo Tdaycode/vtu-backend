@@ -8,7 +8,9 @@ export interface IUser {
   phoneNumber: string;
   userName: string,
   cowryBalance: number,
+  mainBalance: number,
   country: string;
+  currency: string;
   identityHash: string;
   imageURL: string;
   pin: string;
@@ -16,9 +18,13 @@ export interface IUser {
   firstLogin: boolean;
   isIdentityVerified: boolean;
   isEmailVerified: boolean;
+  isSpendingEnabled: boolean;
   isPhoneVerified: boolean;
   accountType: AccountType;
+  accountStatus: AccountStatus;
   kycLevel: Types.ObjectId,
+  identityData: object,
+  bankInfo: BankInfo,
   twoFA: {
     needed: boolean;
     enabled: boolean;
@@ -37,6 +43,11 @@ export enum AccountType {
   ADMIN = 'ADMIN'
 }
 
+export enum AccountStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive'
+}
+
 export interface IUserDocument extends IUser, Document {
   isPasswordMatch: (password: string) => Promise<boolean>;
 }
@@ -45,10 +56,26 @@ export interface IUserModel extends Model<IUserDocument> {
   isEmailTaken: (email: string) => Promise<IUserDocument>;
 }
 
-export interface IUSerIdentity {
+export interface IUserIdentity {
   identityHash: string;
   imageURL: string;
   dob: Date;
+}
+
+export interface BankInfo {
+  bankName: string,
+  accountNumber: string,
+}
+
+export interface IAdminUser {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  country: string;
+  isEmailVerified: boolean;
+  accountType: AccountType;
 }
 
 // export interface AuthRequest extends Request {

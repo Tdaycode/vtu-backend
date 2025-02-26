@@ -5,7 +5,7 @@ import { Service } from 'typedi';
 export class HttpClient {
   constructor(private baseURL = '', private config = {} as AxiosRequestConfig) {}
 
-  private async base<T>(method: string, url: string, body: any = {}, methodHeaders: { [key: string]: string } = {}) {
+  private async base<T>(method: string, url: string, body: any = {}, methodHeaders: { [key: string]: string | number | number } = {}) {
     this.config = {
       baseURL: this.baseURL,
       headers: { 'Content-Type': 'application/json', ...methodHeaders }
@@ -14,7 +14,8 @@ export class HttpClient {
       let response = {} as AxiosResponse<T>;
       switch (method) {
         case 'POST':
-          body = JSON.stringify(body);
+          if(methodHeaders["Content-Type"] !== 'application/x-www-form-urlencoded')
+            body = JSON.stringify(body);
           response = await axios.post<T, AxiosResponse<T>>(`${url}`, body, this.config);
           break;
         case 'PUT':
@@ -40,27 +41,27 @@ export class HttpClient {
     }
   }
 
-  public async get<T>(url: string, header: { [key: string]: string } = {}): Promise<T> {
+  public async get<T>(url: string, header: { [key: string]: string | number } = {}): Promise<T> {
     const response = await this.base<T>('GET', url, {}, header);
     return response;
   }
 
-  public async post<T>(url: string, data: any, header: { [key: string]: string } = {}): Promise<T> {
+  public async post<T>(url: string, data: any, header: { [key: string]: string | number } = {}): Promise<T> {
     const response = await this.base<T>('POST', url, data, header);
     return response;
   }
 
-  public async put<T>(url: string, data: any, header: { [key: string]: string } = {}): Promise<T> {
+  public async put<T>(url: string, data: any, header: { [key: string]: string | number } = {}): Promise<T> {
     const response = await this.base<T>('PUT', url, data, header);
     return response;
   }
 
-  public async patch<T>(url: string, data: any, header: { [key: string]: string } = {}): Promise<T> {
+  public async patch<T>(url: string, data: any, header: { [key: string]: string | number } = {}): Promise<T> {
     const response = await this.base<T>('PATCH', url, data, header);
     return response;
   }
 
-  public async delete<T>(url: string, data: any, header: { [key: string]: string } = {}): Promise<T> {
+  public async delete<T>(url: string, data: any, header: { [key: string]: string | number } = {}): Promise<T> {
     const response = await this.base<T>('DELETE', url, data, header);
     return response;
   }

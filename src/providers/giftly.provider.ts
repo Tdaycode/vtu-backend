@@ -9,6 +9,7 @@ import { encode, decode } from '../utils/crypto';
 import { BadRequestError } from '../utils/ApiError';
 import { GiftlyAccessTokenResponse, GiftlyCatalogAvailabilityResponse, 
   GiftlyCatalogResponse, GiftlyCreateOrderResponse, GiftlyOrderCardsResponse } from '../interfaces/responses/giftly.response.interface';
+import { IFulfillOrder } from '../interfaces/provider.interface';
 
 @Service()
 export class GiftlyProvider {
@@ -30,21 +31,26 @@ export class GiftlyProvider {
     return response.availability;
   }
 
-  public async fulfillOrder(productId: string, amount: number, recipient: string) {
+  public async fulfillOrder(payload: IFulfillOrder) {
+    const { productId, amount, order } = payload;
+
     const reference = uuid();
-    const order = await this.createOrder(reference, productId, amount, recipient);
-    const orderCard = await this.getOrderCards(order.reference_code);
+    const _order = await this.createOrder(reference, productId, amount, order.recipient);
+    if(_order?.status === -1) throw new BadRequestError(_order?.detail)
+    if(!_order?.reference_code) throw new BadRequestError(_order?.detail)
+    const orderCard = await this.getOrderCards(_order.reference_code);
+    const success = _order?.status === 1;
 
     const response = {
-      "Gift Card Number": orderCard.card_number,
-      "Claim Link": orderCard.claim_url,
-      "Gift Card PIN": orderCard.pin_code
+      "Gift Card Number": success ? orderCard?.card_number : "Not yet Available",
+      "Claim Link": success ? _order.share_link : "Not yet Available",
+      "Gift Card PIN": success ? orderCard?.pin_code : "Not yet Available"
     }
 
     const cardInfo = {
-      "cardSerialNumber": orderCard.card_number,
-      "cardPIN": orderCard.pin_code,
-      "claimLink": orderCard.claim_url
+      "cardSerialNumber": success ? orderCard?.card_number : "Not yet Available",
+      "cardPIN": success ? orderCard?.pin_code : "Not yet Available",
+      "claimLink": success ? orderCard?.claim_url : "Not yet Available"
     }
 
     return { reference, data: response, cardInfo };
@@ -72,7 +78,7 @@ export class GiftlyProvider {
     const headers = { Authorization: `Bearer ${accessToken}` };
 
     const response = await new HttpClient(url).get<GiftlyOrderCardsResponse>('', headers);
-    return response.results[0];
+    return response?.results[0] ?? null;
   }
 
   private async getAccessToken(): Promise<GiftlyAccessTokenResponse> {

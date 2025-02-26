@@ -1,3 +1,4 @@
+import { FilterQuery } from 'mongoose';
 import { Service } from 'typedi';
 import { ICowryTransactionDocument, TransactionStatus, Transactiontype } from '../interfaces/cowry-transaction.interface';
 import { CowryTransaction, PaginatedCowryTransaction } from '../models/cowry-transaction';
@@ -10,7 +11,7 @@ export default class CowryTransactionRepository {
     sender: string, description = "Cowry Transfer", session = null
   ): Promise<ICowryTransactionDocument> => {
     const sessionOption = session ? { session } : {};
-    const document = new CowryTransaction({ type, userId,amount, sender, description, status });
+    const document = new CowryTransaction({ type, userId, amount, sender, description, status });
     return await document.save(sessionOption);
   };
 
@@ -22,18 +23,18 @@ export default class CowryTransactionRepository {
     return await CowryTransaction.findOne({ _id: id });
   };
 
-  findOne = async (filter: any): Promise<ICowryTransactionDocument> => {
+  findOne = async (filter: FilterQuery<ICowryTransactionDocument>): Promise<ICowryTransactionDocument> => {
     const result = await CowryTransaction.findOne(filter);
     if (!result) throw new BadRequestError('Cowry Transaction with the given credential does not exist.');
     return result;
   };
 
-  updateOne = async (filter: any, data: any): Promise<ICowryTransactionDocument | null> => {
+  updateOne = async (filter: FilterQuery<ICowryTransactionDocument>, data: any): Promise<ICowryTransactionDocument | null> => {
     const response = await CowryTransaction.findOneAndUpdate(filter, data, { new: true });
     return response;
   };
 
-  findAllWithPagination = async (filter: any = {}, sort: any = {}, skip: number, limit: number) => {
+  findAllWithPagination = async (filter: FilterQuery<ICowryTransactionDocument> = {}, sort: any = {}, skip: number, limit: number) => {
     const options = {
       sort: sort,
       lean: true,

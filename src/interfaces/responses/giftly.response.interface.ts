@@ -23,7 +23,8 @@ export interface GiftlyCreateOrderResponse {
     total_discounts: number
     total_customer_cost: number
     is_completed: boolean
-    share_link: string
+    share_link: string,
+    detail: string
 }
 
 export interface GiftlyOrderCardsResponse {
