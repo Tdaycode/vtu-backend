@@ -21,9 +21,9 @@
           <mj-image
             src="https://firebasestorage.googleapis.com/v0/b/i2talk.appspot.com/o/EGIFT-03%201.png?alt=media&token=7c1cdbed-b397-4b5c-b704-f815861eb0cd"
             align="left"
-            alt="GiftCop logo"
+            alt="Telebank logo"
             width="100px"
-            href="https://giftcop.com"
+            href="https://telebank.com"
           />
         </mj-column>
       </mj-section>
@@ -47,9 +47,9 @@
           
                 <mj-text></mj-text>
           
-          <mj-text>GiftCop Email Verification code is <strong>{code}</strong>. It is valid for 30 minutes, one time use only.</mj-text>
+          <mj-text>Telebank Email Verification code is <strong>{code}</strong>. It is valid for 30 minutes, one time use only.</mj-text>
           
-          <mj-text>If you have any questions or concerns regarding this verification process, please do not hesitate to contact our customer support team at <strong>support@giftcop.com</strong>.</mj-text>
+          <mj-text>If you have any questions or concerns regarding this verification process, please do not hesitate to contact our customer support team at <strong>support@telebank.com</strong>.</mj-text>
           
             <mj-text>
             Regards, <br/>
@@ -66,32 +66,32 @@
           <mj-social font-size="15px" icon-size="30px" mode="horizontal">
             <mj-social-element
               padding="10px"
-              alt="link to giftcop's facebook page"
+              alt="link to telebank's facebook page"
               src="https://res.cloudinary.com/dgdmxaogd/image/upload/v1666277172/facebook_afjonu.png"
-              href="https://web.facebook.com/giftcop"
+              href="https://web.facebook.com/telebank"
             >
             </mj-social-element>
 
             <mj-social-element
               padding="10px"
-              alt="link to giftcop's twitter page"
+              alt="link to telebank's twitter page"
               src="https://res.cloudinary.com/dgdmxaogd/image/upload/v1666277191/twitter_ajhfev.png"
-              href="https://twitter.com/giftcop"
+              href="https://twitter.com/telebank"
             >
             </mj-social-element>
 
             <mj-social-element
               padding="10px"
-              alt="link to giftcop's instagram page"
+              alt="link to telebank's instagram page"
               src="https://res.cloudinary.com/dgdmxaogd/image/upload/v1666277181/instagram_tuvl5g.png"
-              href="https://www.instagram.com/giftcop/"
+              href="https://www.instagram.com/telebank/"
             >
             </mj-social-element>
             <mj-social-element
               padding="10px"
-              alt="link to giftcop's reddit page"
+              alt="link to telebank's reddit page"
               src="https://res.cloudinary.com/dgdmxaogd/image/upload/v1666302066/reddit_qh5j3z.png"
-              href="https://www.reddit.com/user/giftcop"
+              href="https://www.reddit.com/user/telebank"
             >
             </mj-social-element>
           </mj-social>
@@ -109,7 +109,7 @@
             color="#1C1075"
             align="center"
           >
-            https://www.giftcop.com
+            https://www.telebank.com
           </mj-text>
         </mj-column>
         <mj-column border-right="1px solid #E3E8EF" background-color="#f5f7f7">
@@ -120,7 +120,7 @@
             color="#1C1075"
             align="center"
           >
-            support@giftcop.com
+            support@telebank.com
           </mj-text>
         </mj-column>
         <mj-column background-color="#f5f7f7">

@@ -4,7 +4,7 @@ import CowryService from '../services/cowry.service';
 
 
 @Service()
-export class GiftCopProvider {
+export class TelebankProvider {
   public async getCatalogAvailability() {
     return true
   }

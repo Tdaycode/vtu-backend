@@ -637,14 +637,14 @@ export const productsData = [
     },
 
     {
-        name: "GiftCop Cowries",
-        imageUrl: "https://res.cloudinary.com/dfhteb3xs/image/upload/v1682963457/giftcop/IMAGE-1_rfezja.png",
+        name: "Telebank Cowries",
+        imageUrl: "https://res.cloudinary.com/dfhteb3xs/image/upload/v1682963457/telebank/IMAGE-1_rfezja.png",
         category: "Gift Card",
         allowedPaymentOptions: [PaymentTypes.Flutterwave, PaymentTypes.Adyen, PaymentTypes.BinancePay],
         displayCountries: ["GLC"],
         type: ProductTypes.GiftCard,
         providers:[{
-            name: Providers.GiftCop,
+            name: Providers.Telebank,
             productId: "cowry",
             serviceId: ServiceTypes.GiftCard,
             active: true

@@ -49,7 +49,7 @@ export enum PaymentTypes {
 export enum Providers {
     PrimeAirtime = 'primeairtime',
     Giftly = 'giftly',
-    GiftCop = 'giftcop'
+    Telebank = 'telebank'
 }
 
 export enum ServiceFeeType {

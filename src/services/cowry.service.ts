@@ -82,7 +82,7 @@ export default class CowryService {
   };
 
   public recordCowryTransaction = async (userId: string, type: Transactiontype, status: TransactionStatus, 
-    amount: number, sender = "GiftCop") => {
+    amount: number, sender = "Telebank") => {
     const transaction = await this.cowryTransactionRepository.create(userId, type, amount, status, sender);
     return transaction;
   };

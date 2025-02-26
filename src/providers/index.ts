@@ -1,6 +1,6 @@
 import { PrimeAirtimeProvider } from './primeAirtime.provider';
 import { ReloadlyProvider } from './reloadly.provider';
-import { GiftCopProvider } from './giftcop.provider';
+import { TelebankProvider } from './telebank.provider';
 import { FlutterwaveProvider } from './flutterwave.provider';
 import { GiftlyProvider } from './giftly.provider';
 import { ExchangeRateProvider } from './exchangerate.provider';
@@ -8,7 +8,7 @@ import { ExchangeRateProvider } from './exchangerate.provider';
 export { 
     PrimeAirtimeProvider,
     ReloadlyProvider,
-    GiftCopProvider,
+    TelebankProvider,
     FlutterwaveProvider,
     GiftlyProvider,
     ExchangeRateProvider

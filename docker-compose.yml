@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  giftcop-backend:
+  telebank-backend:
     depends_on:
       - database-layer
     environment:
@@ -12,7 +12,7 @@ services:
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
-    container_name: giftcop-backend
+    container_name: telebank-backend
     expose:
       - '4000'
     ports:

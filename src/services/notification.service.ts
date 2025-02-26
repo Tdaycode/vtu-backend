@@ -23,7 +23,7 @@ export default class NotificationService {
     try {
       const contentHtml = await mjmlUtils.inject(htmlVerificationEmail, { name, email, code });
       const _data = await sendEmail({
-        subject: 'Verify your GiftCop Account',
+        subject: 'Verify your Telebank Account',
         email,
         html: contentHtml,
       });

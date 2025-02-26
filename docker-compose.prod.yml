@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  giftcop-backend:
+  telebank-backend:
     environment:
       - NODE_ENV=production
     build:
