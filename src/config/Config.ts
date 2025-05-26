@@ -13,7 +13,7 @@ const config = {
   jwtRefreshExpirationDays: 365,
   otpExpirationMinutes: 30,
   cryptoSecret: process.env.CRYPTO_SECRET ?? '',
-  emailSender: 'rashotech@gmail.com',
+  emailSender: 's',
   twilioSID: process.env.TWILIO_ACCOUNT_SID ?? '',
   twilioToken: process.env.TWILIO_AUTH_TOKEN ?? '',
   twilioVerifySID: process.env.TWILIO_VERIFY_SID ?? '',
@@ -70,6 +70,10 @@ const config = {
 
   sendchampBaseUrl: process.env.SENDCHAMP_BASE_URL ?? '',
   sendchampPublicKey: process.env.SENDCHAMP_PUBLIC_KEY ?? '', 
+
+
+  gmailUser: process.env.GMAIL_USER ?? '',
+  gmailPassword: process.env.GMAIL_PASSWORD ?? '',
 };
 
 export default config;

@@ -1193,7 +1193,7 @@ export const currencyData = [
         default: true,
         name: "Naira",
         code: "NGN",
-        symbol: "$",
+        symbol: "#",
         base: "USD",
         rate: 1500,
         status: "active",

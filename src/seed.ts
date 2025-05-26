@@ -49,6 +49,7 @@ class Seed {
   private initCategories = async (data: ICategory[]) => {
     try {
       for (const category of data) {
+        if (category.name === 'Betting') continue;
         const response = await this.categoryRepository.findOne({ name: category.name });
         if (!response) {
           await this.categoryRepository.create(category)
@@ -62,8 +63,10 @@ class Seed {
 
   private initProducts = async (data: any) => {
     try {
-      // await this.productRepository.deleteMany();
+      console.log('Here')
+      await this.productRepository.deleteMany();
       for (const product of data) {
+        if(product.type === 'Betting') continue;
         const category = await this.categoryRepository.findOne({ name: product.category });
         if (category) await this.productRepository.create({ ...product, category: category._id });
       }
@@ -230,15 +233,15 @@ class Seed {
   public seedDB = async () => {
     Promise.all([
       await this.database.initDatabase(),
-      // await this.initKYCLevels(kycLevelsData),
-      // await this.initCategories(categoriesData),
-      // await this.initProducts(productsData),
-      // await this.initGiftCardProducts(),
-      // await this.initCurrency(currencyData),
-      // await this.initSettings(settingsData),
-      // await this.initAdmin(adminData),
-      // await this.initValueTopupProducts(),
-      // await this.initPaymentMethods(paymentMethodsData),
+      await this.initKYCLevels(kycLevelsData),
+      await this.initCategories(categoriesData),
+      await this.initProducts(productsData),
+      await this.initGiftCardProducts(),
+      await this.initCurrency(currencyData),
+      await this.initSettings(settingsData),
+      await this.initAdmin(adminData),
+      await this.initValueTopupProducts(),
+      await this.initPaymentMethods(paymentMethodsData),
       await this.database.disconnectDatabase()
     ])
   }
